@@ -22,7 +22,7 @@ function Scene.setScene(pScene, pLoad)
       Scene.current = scene.name
       if pLoad then
         if currentScene.load then
-          currentScene.load()
+          currentScene.load(currentScene)
         end
       end
       return true
@@ -36,21 +36,21 @@ end
 
 function Scene.loadScene()
   if currentScene.load then
-    currentScene.load()
+    currentScene:load()
   end
 end
 --
 
 function Scene.update(dt)
   if currentScene.update then
-    currentScene.update(dt)
+    currentScene:update(dt)
   end
 end
 --
 
 function Scene.draw()
   if currentScene.draw then
-    currentScene.draw()
+    currentScene:draw()
   end
   if Scene.debug then
     love.graphics.print("Scene : "..Scene.current,350,10)
@@ -60,14 +60,14 @@ end
 
 function Scene.keypressed(key)
   if currentScene.keypressed then
-    currentScene.keypressed(key)
+    currentScene:keypressed(key)
   end
 end
 --
 
 function Scene.mousepressed(x,y,button)
   if currentScene.mousepressed then
-    currentScene.mousepressed(dt)
+    currentScene:mousepressed(x,y,button)
   end
 end
 --

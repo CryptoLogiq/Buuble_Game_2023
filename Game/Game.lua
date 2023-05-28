@@ -1,7 +1,11 @@
-local Game = {debug=false}
+local Game = {debug=false, isPlay=false}
 
-local BackGround = require("Game/BackGround")
-local MapManager = require("Game/MapManager")
+
+World = love.physics.newWorld(0,0,false)
+
+BackGround = require("Game/BackGround")
+MapManager = require("Game/MapManager")
+Bubbles  = require("Game/Bubbles")
 
 function Game:getDimensions()
   self.w, self.h = love.graphics.getDimensions()
@@ -9,27 +13,41 @@ end
 --
 
 --
-function Game.load()
+function Game:load()
   Game:getDimensions()
+  --
+  Bubbles:load()
   --
   BackGround:load()
   MapManager:load()
 end
 --
 
-function Game.update(dt)
-  Game:getDimensions()
+function Game:update(dt)
+  Game:getDimensions(dt)
   --
   BackGround:update(dt)
   MapManager:update(dt)
+  Bubbles:update(dt)
+  if Game.isPlay then
+    --Player:update(dt)
+  end
 end
 --
 
-function Game.draw()
+function Game:draw()
   love.graphics.print("Bubble Game 2023")
   --
   BackGround:draw()
   MapManager:draw()
+  Bubbles:draw()
+end
+--
+
+function Game:keypressed(key)
+  BackGround:keypressed(key)
+  MapManager:keypressed(key)
+  Bubbles:keypressed(key)
 end
 --
 

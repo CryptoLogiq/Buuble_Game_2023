@@ -31,7 +31,6 @@ function BackGround:load()
     --
     cloud.sx = math.sign(cloud.speed)
     cloud.sy = 1
-    print(cloud.speed)
   end
 
 end
@@ -65,6 +64,13 @@ function BackGround:draw()
   end
   --
   love.graphics.draw(premierplan.imgdata,0,0,0,premierplan.sx, premierplan.sy)
+end
+--
+
+
+function BackGround:keypressed(key)
+  if BackGround.debug then
+  end
 end
 --
 

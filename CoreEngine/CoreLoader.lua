@@ -1,5 +1,5 @@
 
-local CoreLoader = {debug=true}
+local CoreLoader = {debug=false}
 
 --
 local Core = {}
