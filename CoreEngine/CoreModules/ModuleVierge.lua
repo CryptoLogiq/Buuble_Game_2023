@@ -12,4 +12,14 @@ function Module:draw()
 end
 --
 
+
+function Module:keypressed(key)
+end
+--
+
+
+function Module:mousepressed(x,y,button)
+end
+--
+
 return Module

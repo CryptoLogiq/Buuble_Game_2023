@@ -32,11 +32,6 @@ end
 
 function love.keypressed(key)
   Core.Scene.keypressed(key)
-  if debug then
-    if key == "escape" then
-      love.event.quit()
-    end
-  end
 end
 --
 

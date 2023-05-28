@@ -29,6 +29,7 @@ function ImageManager.newImage(pfile)
   local new = {imgdata=lg.newImage(pfile), file=pfile}
   function new.getDimensions()
     new.w, new.h = new.imgdata:getDimensions()
+    new.ox, new.oy = new.w/2, new.h/2
   end
   --
   new.getDimensions()

@@ -50,7 +50,7 @@ function MapManager:load()
   MapManager.current = MapManager:new(12, 18)
   MapManager.current.nbGridOnScreen = 3
   --
-  Bubbles:new(MapManager.current.nbGridOnScreen)
+  Bubbles:newMap(MapManager.current.nbGridOnScreen)
 end
 --
 
