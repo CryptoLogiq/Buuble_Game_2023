@@ -118,6 +118,7 @@ end
 
 function Controllers:mousepressed(x,y,button)
   if Game.isPlay then
+
   end
 end
 --

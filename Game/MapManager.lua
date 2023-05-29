@@ -12,6 +12,7 @@ function MapManager:new(lig, col)
   --
   local startY = 0
   local startX = (Game.w/2)-(w/2)
+  local startLeft = true
   --
   local decX = (Game.w-w) / 2
   local rectLeft = {mode="fill", x=0, y=0, w=decX, h=Game.h}
@@ -21,13 +22,29 @@ function MapManager:new(lig, col)
   local x=startX+ox
   local y=startY
   --  --
-  local MapManager = {x=startX, y=startY, w=w, h=h, ox=ox, oy=oy, lig=lig, col=col, decX=decX, cellH=cellH,cellW=cellW, bordures={rectLeft,rectRight}}
+  local map = {
+    startLeft=startLeft,
+    x=startX,
+    y=startY,
+    startX=startX,
+    startY=startY,
+    w=w,
+    h=h,
+    ox=ox,
+    oy=oy,
+    lig=lig,
+    col=col,
+    decX=decX,
+    cellH=cellH,
+    cellW=cellW,
+    bordures={rectLeft,rectRight}
+  }
   --
   for l=1, lig do
-    MapManager[l]={}
+    map[l]={}
     for c=1, col do
-      local grid = {isFree=true, x=x, y=y, w=w, h=h, ox=ox, oy=oy, cx=x+ox, cy=y+oy, l=l, c=c}
-      MapManager[l][c]=grid
+      -- grid :
+      map[l][c]= {isFree=true, x=x, y=y, w=w, h=h, ox=ox, oy=oy, cx=x+ox, cy=y+oy, lig=l, col=c}
       --
       x=x+cellW
     end
@@ -40,9 +57,39 @@ function MapManager:new(lig, col)
 
     y=y+cellH
   end
-  table.insert(listMapManagers, MapManager)
+  table.insert(listMapManagers, map)
 
-  return MapManager
+  return map
+end
+--
+
+function MapManager:changeOffset()
+  local map = MapManager.current
+  local pLeft = not map.startLeft
+  --
+  map.startLeft = not map.startLeft
+  --
+  local x = 0
+  if pLeft then
+    x = map.startX + map.ox
+  else
+    x = map.startX
+  end
+  --
+  for l=1, map.lig do
+    for c=1, map.col do
+      local grid = map[l][c]
+      grid.x = x + map.cellW
+      grid.cx = x + map.ox
+      x = x + map.cellW
+    end
+    pLeft = not pLeft
+    if pLeft then
+      x = map.startX + map.ox
+    else
+      x = map.startX
+    end
+  end
 end
 --
 
@@ -74,7 +121,7 @@ function MapManager:draw()
       for c=1, MapManager.current.col do
         local grid = MapManager.current[l][c]
         love.graphics.circle("line",grid.cx,grid.cy,grid.ox)
-        love.graphics.print("l:"..grid.l.."\n".."c:"..grid.c, grid.cx, grid.cy,0,1,1,0,12)
+        love.graphics.print("l:"..grid.lig.."\n".."c:"..grid.col, grid.cx, grid.cy,0,1,1,0,12)
       end
     end
   end

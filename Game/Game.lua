@@ -1,4 +1,4 @@
-local Game = {debug=true, isStop=false, isPlay=false}
+local Game = {debug=true, isStop=false, isPlay=false, gameover=false}
 
 
 World = love.physics.newWorld(0,0,false)
@@ -12,6 +12,13 @@ Sounds  = require("Game/Sounds")
 function Game:getDimensions()
   self.w, self.h = love.graphics.getDimensions()
   self.ox, self.oy = self.w/2, self.h/2
+end
+--
+
+function Game:newGame()
+  Game.gameover=false
+  --
+  
 end
 --
 
@@ -60,6 +67,14 @@ function Game:draw()
     for k, v in pairs(Game) do
       if type(v) ~= "table" and type(v) ~= "function" then
         textDebugGame = textDebugGame.."Game."..tostring(k).." : "..tostring(v).."\n"
+      end
+    end
+    --
+    textDebugGame = textDebugGame.."-------------------------".."\n"
+    --
+    for k, v in pairs(Bubbles) do
+      if type(v) ~= "table" and type(v) ~= "function" then
+        textDebugGame = textDebugGame.."Bubbles."..tostring(k).." : "..tostring(v).."\n"
       end
     end
     love.graphics.print(textDebugGame,10,10)
