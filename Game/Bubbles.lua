@@ -22,7 +22,7 @@ function Bubbles:newBubble(x, y, isPlayer, World, grid)
   bub.fixture = love.physics.newFixture(bub.body, bub.shape)
   bub.fixture:setRestitution(0.9)
   --
-  bub.timer={current=0, delai=180, speed=60}
+  bub.timer={current=0, delai=180, speed=love.math.random(60,180)}
   --
   function bub:getGroup()
     for _, other in ipairs(Bubbles.listGrid) do
@@ -189,6 +189,11 @@ function Bubbles:updateBubblePlayer(dt)
           break
         end
       end
+      if not isTouching then
+        if Bubbles.game.body:isTouching(WallsMap.upGrid.body) then
+          isTouching = true
+        end
+      end
       if isTouching then
         Bubbles.game.body:setLinearVelocity(0,0)
         --
@@ -202,8 +207,11 @@ function Bubbles:updateBubblePlayer(dt)
         Bubbles.readyLaunch = false
         --
         if Bubbles.game.group then
-          if Bubbles:impactGroup(Bubbles.game.x, Bubbles.game.y) then
-            print("HERE")
+          local destroy, nbBubbles = Bubbles:impactGroup(Bubbles.game.x, Bubbles.game.y)
+          if destroy then
+            if nbBubbles >= 5 then
+              Sounds.correct:play()
+            end
           end
         end
       end
@@ -223,10 +231,11 @@ function Bubbles:impactGroup(x,y)
         if bub.group then
           local destroyList = {}
           destroyList = Bubbles:createGroupePurge(bub)
-          Bubbles:destroyGroup(destroyList)
+          if #destroyList >= 3 then
+            Bubbles:destroyGroup(destroyList)
+            return true, #destroyList
+          end
           --
-          --Game.isPlay = false
-          return true
         end
       end
     end

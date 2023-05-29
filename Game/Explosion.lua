@@ -1,9 +1,19 @@
 local Explosion = {debug=false, list={}}
 
+local sensRot = {-1, 1}
+
 function Explosion:createNewExplosion(x,y)
-  local explo = {x=x, y=y, frame=1, timer={current=0, delai=30, speed=love.math.random(120,300)}}
+  local explo = {
+    x=x,
+    y=y,
+    frame=1,
+    sound=Sounds.explodeBubble[love.math.random(#Sounds.explodeBubble)]:clone(),
+    rotate=sensRot[love.math.random(#sensRot)],
+    timer={current=0, delai=30, speed=love.math.random(90,120)} -- ICI
+  }
   --
   function explo:update(dt)
+    explo.rotate = explo.rotate + (explo.timer.speed * dt)
     explo.timer.current = explo.timer.current + (explo.timer.speed * dt)
     if explo.timer.current >= explo.timer.delai then
       explo.timer.current = 0
@@ -43,9 +53,14 @@ function Explosion:update(dt)
     local explo = Explosion.list[n]
     if explo:update(dt) then
       explo.frame = explo.frame + 1
+      if explo.frame == 2 then
+        explo.sound:play()
+      end
       if explo.frame > #Explosion.images then
-        explo.frame = 1
-        table.remove(self.list, n)
+        explo.isDestroy = true
+        if not explo.sound:isPlaying() then
+          table.remove(self.list, n)
+        end
       end
     end
   end
@@ -54,7 +69,9 @@ end
 
 function Explosion:draw()
   for _, explo in ipairs(Explosion.list) do
-    love.graphics.draw(Explosion.images.imgdata, Explosion.images[explo.frame].quad, explo.x, explo.y)
+    if not explo.isDestroy then
+      love.graphics.draw(Explosion.images.imgdata, Explosion.images[explo.frame].quad, explo.x, explo.y,0, 2,2)
+    end
   end
 end
 --
