@@ -118,7 +118,7 @@ end
 
 function Controllers:mousepressed(x,y,button)
   if Game.isPlay then
-
+    Bubbles:destroyMouse(x,y)
   end
 end
 --

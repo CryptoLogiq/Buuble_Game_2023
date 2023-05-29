@@ -1,13 +1,16 @@
-local Game = {debug=true, isStop=false, isPlay=false, gameover=false}
+local Game = {debug=false, isStop=false, isPlay=false, gameover=false}
 
-
-World = love.physics.newWorld(0,0,false)
+love.physics.setMeter(64)
+WorldGrid = love.physics.newWorld(0,0,false)
+WorldDestroy = love.physics.newWorld(0,10*64,false)
 
 BackGround = require("Game/BackGround")
 MapManager = require("Game/MapManager")
+WallsMap = require("Game/WallsMap")
 Bubbles  = require("Game/Bubbles")
 Controllers  = require("Game/Controllers")
 Sounds  = require("Game/Sounds")
+Explosion  = require("Game/Explosion")
 
 function Game:getDimensions()
   self.w, self.h = love.graphics.getDimensions()
@@ -18,7 +21,7 @@ end
 function Game:newGame()
   Game.gameover=false
   --
-  
+
 end
 --
 
@@ -28,18 +31,25 @@ function Game:load()
   --
   Bubbles:load()
   Sounds:load()
+  Explosion:load()
   --
   BackGround:load()
   MapManager:load()
+  --
+  WallsMap:load()
   Controllers:load()
 end
 --
 
 function Game:update(dt)
+  WorldGrid:update(dt)
+  WorldDestroy:update(dt)
+  --
   Game:getDimensions(dt)
   BackGround:update(dt)
   Controllers:update(dt)
   Sounds:update(dt)
+  Explosion:update(dt)
   if Game.isStop then
   else
     MapManager:update(dt)
@@ -54,8 +64,10 @@ function Game:draw()
   BackGround:draw()
   --
   Controllers:draw()
+  WallsMap:draw()
   MapManager:draw()
   Bubbles:draw()
+  Explosion:draw()
   --
   Sounds:draw()
   --
@@ -92,6 +104,11 @@ function Game:keypressed(key)
   MapManager:keypressed(key)
   Bubbles:keypressed(key)
   Sounds:keypressed(key)
+end
+--
+
+function Game:mousepressed(x,y,button)
+  Controllers:mousepressed(x,y,button)
 end
 --
 

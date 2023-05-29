@@ -1,5 +1,9 @@
 local Module = {debug=false}
 
+function Module:new()
+end
+--
+
 function Module:load()
 end
 --
