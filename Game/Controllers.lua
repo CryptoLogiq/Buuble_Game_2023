@@ -1,7 +1,5 @@
 local Controllers = {debug=false}
 
-local mouse = love.mouse
-
 local dirCurseur = "ressources/images/crosshair"
 local filesCurseur = love.filesystem.getDirectoryItems(dirCurseur)
 local listCurseurs = {}
@@ -43,8 +41,10 @@ end
 function ligneRail:update(dt)
   self.x = Game.ox
   self.y = Game.h
-  self.rotate = math.angle(self.x,self.y,mouse.x,mouse.y)-- + math.rad(-90)
-  self.distance = math.dist(self.x,self.y,mouse.x,mouse.y)
+  self.rotate = math.angle(self.x,self.y,Mouse.x,Mouse.y)-- + math.rad(-90)
+  self.distance = math.dist(self.x,self.y,Mouse.x,Mouse.y)
+  --
+  Mouse.angle = self.rotate
 end
 --
 
@@ -69,29 +69,22 @@ function ligneRail:draw()
 end
 --
 
-function mouse:update(dt)
-  self.x, self.y = self:getPosition()
-end
---
-
 function Controllers:load()
-  mouse.setVisible(false)
+  Mouse.setVisible(false)
+  Mouse:update()
 end
 --
 
 function Controllers:update(dt)
-  mouse:update(dt)
+  Mouse:update()
   demicercleRail:update(dt)
   ligneRail:update(dt)
-  --
-  if Game.isPlay then
-  end
 end
 --
 
 function Controllers:draw()
   love.graphics.setColor(curseur.color)
-  love.graphics.draw(curseur.data.imgdata, mouse.x, mouse.y, 0, 1, 1, curseur.data.ox, curseur.data.oy)
+  love.graphics.draw(curseur.data.imgdata, Mouse.x, Mouse.y, 0, 1, 1, curseur.data.ox, curseur.data.oy)
   love.graphics.setColor(1,1,1,1)
 
   if Game.isPlay then
@@ -101,7 +94,6 @@ function Controllers:draw()
     -- ligne rail
     ligneRail:draw()
   end
-
 end
 --
 
@@ -118,7 +110,8 @@ end
 
 function Controllers:mousepressed(x,y,button)
   if Game.isPlay then
-    Bubbles:destroyMouse(x,y)
+    Bubbles:launchBubble()
+--    Bubbles:destroyMouse(x,y)
   end
 end
 --

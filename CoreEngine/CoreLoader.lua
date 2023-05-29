@@ -11,6 +11,7 @@ local filesTable = love.filesystem.getDirectoryItems(dirpath)
 function CoreLoader:load()
   -- For All
   require(dirpath.."Globals")
+  require(dirpath.."Colors")
 
   -- Libs independante
   Core.Gamera = require(dirpath.."Gamera")

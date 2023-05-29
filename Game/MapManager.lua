@@ -2,6 +2,12 @@ local MapManager = {debug=true, current=nil}
 
 local listMapManagers = {}
 
+function MapManager:newGame()
+  MapManager.current = MapManager:new(12, 18)
+  MapManager.current.nbGridOnScreen = 3
+end
+--
+
 function MapManager:new(lig, col)
   local cellW = 64
   local cellH = 64
@@ -93,11 +99,44 @@ function MapManager:changeOffset()
 end
 --
 
+function MapManager:getGrid(x, y)
+  local map = MapManager.current
+  --
+  if x >= map.x and x <= map.x+map.w and y >= map.y and y <= map.h then
+    --
+    local list = {}
+    --
+    for lig=1, map.lig do
+      for col=1, map.col do
+        local grid = map[lig][col]
+        --
+        local dist = math.dist(x,y, grid.cx, grid.cy)
+        if dist <= 75 then
+          --
+          table.insert(list, {dist=dist, grid=grid} )
+          --
+        end
+        --
+      end
+    end
+    --
+    if #list > 0 then
+      table.sort(list, function(a, b) return a.dist < b.dist end)
+      return list[1].grid
+    else
+      print("Bubble N'as pas trouver de grid")
+      return false
+    end
+  else
+    print("Bubble Hors Map")
+    return false
+  end
+end
+--
+
 function MapManager:load()
   MapManager.current = MapManager:new(12, 18)
   MapManager.current.nbGridOnScreen = 3
-  --
-  Bubbles:newMap(MapManager.current.nbGridOnScreen)
 end
 --
 

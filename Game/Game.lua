@@ -1,16 +1,7 @@
 local Game = {debug=false, isStop=false, isPlay=false, gameover=false}
 
-love.physics.setMeter(64)
-WorldGrid = love.physics.newWorld(0,0,false)
-WorldDestroy = love.physics.newWorld(0,10*64,false)
-
-BackGround = require("Game/BackGround")
-MapManager = require("Game/MapManager")
-WallsMap = require("Game/WallsMap")
-Bubbles  = require("Game/Bubbles")
-Controllers  = require("Game/Controllers")
-Sounds  = require("Game/Sounds")
-Explosion  = require("Game/Explosion")
+Game.texts = {}
+Game.font = {}
 
 function Game:getDimensions()
   self.w, self.h = love.graphics.getDimensions()
@@ -19,9 +10,14 @@ end
 --
 
 function Game:newGame()
+  Game.isStop = false
+  --
   Game.gameover=false
   --
-
+  MapManager:newGame()
+  Bubbles:newGame()
+  Sounds:newGame()
+  Explosion:newGame()
 end
 --
 
@@ -29,29 +25,25 @@ end
 function Game:load()
   Game:getDimensions()
   --
-  Bubbles:load()
-  Sounds:load()
-  Explosion:load()
-  --
-  BackGround:load()
-  MapManager:load()
-  --
-  WallsMap:load()
-  Controllers:load()
+  for  n=1, 100 do
+  table.insert(Game.font , love.graphics.newFont("ressources/fonts/Games.ttf", n) )
+  end
+  Game.texts.isStop = {txtdata = love.graphics.newText(Game.font[50], "WAITING")}
+  Game.texts.isStop.w, Game.texts.isStop.h = Game.texts.isStop.txtdata:getDimensions()
+  Game.texts.isStop.ox, Game.texts.isStop.oy = Game.texts.isStop.w/2, Game.texts.isStop.h/2
+  Game.texts.isStop.color = {0,1,0,1}
 end
 --
 
 function Game:update(dt)
-  WorldGrid:update(dt)
-  WorldDestroy:update(dt)
-  --
+
   Game:getDimensions(dt)
   BackGround:update(dt)
   Controllers:update(dt)
   Sounds:update(dt)
-  Explosion:update(dt)
   if Game.isStop then
   else
+    Explosion:update(dt)
     MapManager:update(dt)
     Bubbles:update(dt)
   end
@@ -59,7 +51,6 @@ end
 --
 
 function Game:draw()
-  love.graphics.print("Bubble Game 2023")
   --
   BackGround:draw()
   --
@@ -72,8 +63,11 @@ function Game:draw()
   Sounds:draw()
   --
   if Game.isStop then
-    love.graphics.print("PAUSE", Game.ox, Game.oy, 0, 5, 5)
+    love.graphics.setColor(Game.texts.isStop.color)
+    love.graphics.draw(Game.texts.isStop.txtdata, Game.ox, Game.oy, 0, 1, 1, Game.texts.isStop.ox, Game.texts.isStop.oy)
+    love.graphics.setColor(1,1,1,1)
   end
+  --
   if Game.debug then
     local textDebugGame = ""
     for k, v in pairs(Game) do

@@ -13,7 +13,7 @@ Bubbles.game = nil
 Bubbles.readyLaunch = false
 
 function Bubbles:newBubble(x, y, isPlayer, World, grid)
-  local bub = {world=World, debug=false, isPlayer=isPlayer, isDestroy=false, grid=grid or nil, x=x, y=y, radius=32, ox=32, oy=32, speed=60, color=love.math.random(5)}
+  local bub = {world=World, debug=false, isPlayer=isPlayer, isDestroy=false, grid=grid or nil, x=x, y=y, radius=32, ox=32, oy=32, speed=60, color=love.math.random(5), isLaunch=false}
   --
   bub.img = Bubbles.images[bub.color]
   --
@@ -37,22 +37,21 @@ function Bubbles:newBubble(x, y, isPlayer, World, grid)
       end
     end
   end
+  --
   function bub:getIsProx()
-    if not self.isPlayer then
-      if self.isDestroy == false then
-        for _, other in ipairs(Bubbles.listGrid) do
-          if other ~= self and not other.isDestroy then
-            local dist = math.dist(self.x, self.y, other.x, other.y)
-            if dist <= 80 then
-              return true
-            end
+    if not self.isPlayer and self.isDestroy == false then
+      for _, other in ipairs(Bubbles.listGrid) do
+        if other ~= self and not other.isDestroy then
+          local dist = math.dist(self.x, self.y, other.x, other.y)
+          if dist <= 80 then
+            return true
           end
         end
-        -- si il n'y pas de bubble a proximite alors :
-        bub:changeWorld(WorldDestroy)
       end
-      return false
+      -- si il n'y pas de bubble a proximite alors :
+      bub:changeWorld(WorldDestroy)
     end
+    return false
   end
   --
   function bub:changeWorld(world)
@@ -67,7 +66,7 @@ function Bubbles:newBubble(x, y, isPlayer, World, grid)
     new.body:setType("dynamic")
     new.body:applyForce(love.math.random(-150,150), love.math.random(510,660))
   end
-
+  --
   function bub:update(dt)
     if not bub.destroy then
       bub.x, bub.y = bub.body:getPosition()
@@ -91,13 +90,13 @@ function Bubbles:newBubble(x, y, isPlayer, World, grid)
     end
     return false
   end
---
+  --
   if World == WorldGrid then
     table.insert(Bubbles.listGrid, bub)
   elseif World == WorldDestroy then
     table.insert(Bubbles.listDestroy, bub)
   end
---
+  --
   return bub
 end
 --
@@ -163,14 +162,66 @@ function Bubbles:getBubbleInList(bub, list)
 end
 --
 
-function Bubbles:destroyMouse(x,y)
+function Bubbles:launchBubble()
+  if Bubbles.readyLaunch and Game.isPlay then
+    --
+    local cos = math.cos(Mouse.angle)
+    local sin = math.sin(Mouse.angle)
+    Bubbles.game.body:setLinearVelocity(cos*Bubbles.game.speed*20, sin*Bubbles.game.speed*20)
+    Bubbles.game.body:setType("dynamic")
+    Bubbles.game.isLaunch = true
+    --
+    Game.isPlay = false
+  end
+end
+--
+
+function Bubbles:updateBubblePlayer(dt)
+  if Bubbles.game then
+    --
+    Bubbles.game.x, Bubbles.game.y = Bubbles.game.body:getPosition()
+    --
+    if Bubbles.game.isLaunch then
+      local isTouching = false
+      for _, other in pairs(Bubbles.listGrid) do
+        if Bubbles.game.body:isTouching(other.body) then
+          isTouching = true
+          break
+        end
+      end
+      if isTouching then
+        Bubbles.game.body:setLinearVelocity(0,0)
+        --
+        Bubbles.game.grid = MapManager:getGrid(Bubbles.game.x, Bubbles.game.y)
+        Bubbles.game.x, Bubbles.game.y = Bubbles.game.grid.cx, Bubbles.game.grid.cy
+        Bubbles.game.body:setPosition(Bubbles.game.x, Bubbles.game.y)
+        Bubbles.game.isPlayer = false
+        --
+        Bubbles:createGroupColor()
+        --
+        Bubbles.readyLaunch = false
+        --
+        if Bubbles.game.group then
+          if Bubbles:impactGroup(Bubbles.game.x, Bubbles.game.y) then
+            print("HERE")
+          end
+        end
+      end
+    end
+    --
+  end
+end
+--
+
+function Bubbles:impactGroup(x,y)
+
+  --
   for _, bub in ipairs(Bubbles.listGrid) do
-    if bub.grid then
-      local dist = math.dist(bub.x, bub.y, x, y)
-      if dist <= bub.radius then
+    if bub.grid and bub.color == Bubbles.game.color then
+      local dist = math.dist(x, y, bub.x, bub.y)
+      if dist <= 80 then
         if bub.group then
           local destroyList = {}
---          table.insert(destroyList, bub)
           destroyList = Bubbles:createGroupePurge(bub)
           Bubbles:destroyGroup(destroyList)
           --
@@ -213,15 +264,22 @@ function Bubbles:addLigne(nbLig)
 end
 --
 
-function Bubbles:launchBubble(angle)
-  if Bubbles.readyLaunch and Game.isPlay then
-    --
-    --
-    Game.isPlay = false
+function Bubbles:resetList(list)
+  for _, bubble in ipairs(list) do
+    bubble:destroy()
   end
+  --
+  list = {}
 end
 --
 
+function Bubbles:newGame()
+  Bubbles:resetList(Bubbles.listGrid)
+  Bubbles:resetList(Bubbles.listDestroy)
+  --
+  Bubbles:newMap(MapManager.current.nbGridOnScreen)
+end
+--
 
 function Bubbles:load()
   for n=1, 5 do
@@ -232,7 +290,7 @@ end
 --
 
 function Bubbles:MoveGrid(dt)
-  if not Game.isPlay then
+  if not Game.isPlay and not Game.isStop then
     --
     local goplay = true -- ready to play ?
     --
@@ -303,9 +361,7 @@ function Bubbles:update(dt)
   Bubbles:MoveGrid(dt)
 
   -- update pos for bub of player :
-  if Bubbles.game then
-    Bubbles.game.x, Bubbles.game.y = Bubbles.game.body:getPosition()
-  end
+  Bubbles:updateBubblePlayer(dt)
 
   -- Create a new bub player ?
   if not Bubbles.readyLaunch and Game.isPlay then

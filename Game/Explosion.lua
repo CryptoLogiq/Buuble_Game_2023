@@ -26,6 +26,11 @@ function Explosion:newExplosion(x,y)
 end
 --
 
+function Explosion:newGame()
+  Explosion.list={}
+end
+--
+
 function Explosion:load()
   Explosion.images = Core.ImageManager.newAnimFile("ressources/images/explosion.png", 3, 3)
 end

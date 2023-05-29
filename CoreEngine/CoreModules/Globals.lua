@@ -1,3 +1,10 @@
+Mouse = love.mouse
+
+function Mouse:update()
+  self.x, self.y = self:getPosition()
+end
+--
+
 -- print table complete
 function printTable(table, name, isStart)
   if not name then name = "table" end

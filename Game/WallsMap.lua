@@ -1,11 +1,17 @@
 local WallsMap = {debug=false, list={}}
 
 function WallsMap:new(x,y,w,h)
-  local new = {x=x,y=y,w=w,h=h}
-  new.body = love.physics.newBody(WorldDestroy, x, y, "static")
-  new.shape = love.physics.newRectangleShape(w,h)
-  new.fixture = love.physics.newFixture(new.body, new.shape)
-  table.insert(self.list, new)
+  local w_destroy = {x=x,y=y,w=w,h=h}
+  w_destroy.body = love.physics.newBody(WorldDestroy, x, y, "static")
+  w_destroy.shape = love.physics.newRectangleShape(w,h)
+  w_destroy.fixture = love.physics.newFixture(w_destroy.body, w_destroy.shape)
+  table.insert(self.list, w_destroy)
+  --
+  local w_grid = {x=x,y=y,w=w,h=h}
+  w_grid.body = love.physics.newBody(WorldGrid, x, y, "static")
+  w_grid.shape = love.physics.newRectangleShape(w,h)
+  w_grid.fixture = love.physics.newFixture(w_grid.body, w_grid.shape)
+  table.insert(self.list, w_grid)
 end
 --
 
