@@ -40,6 +40,9 @@ function Bubbles:newBubble(x, y, isPlayer, World, grid)
   --
   function bub:getIsProx()
     if not self.isPlayer and self.isDestroy == false then
+      if bub.grid.lig == 1 then
+        return true
+      end
       for _, other in ipairs(Bubbles.listGrid) do
         if other ~= self and not other.isDestroy then
           local dist = math.dist(self.x, self.y, other.x, other.y)
@@ -201,6 +204,7 @@ function Bubbles:updateBubblePlayer(dt)
         Bubbles.game.x, Bubbles.game.y = Bubbles.game.grid.cx, Bubbles.game.grid.cy
         Bubbles.game.body:setPosition(Bubbles.game.x, Bubbles.game.y)
         Bubbles.game.isPlayer = false
+        Bubbles.game.body:setType("kinematic")
         --
         Bubbles:createGroupColor()
         --
