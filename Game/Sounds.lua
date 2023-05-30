@@ -9,9 +9,7 @@ Sounds.volumeSfx = 1
 function Sounds:newGame()
   Sounds:purgeList()
   --
-  Sounds.musique:stop()
-  Sounds.musique:play()
-  Sounds.musique:setVolume(0)
+  Sounds.musique:setVolume(0.5)
   --
   --Sounds:newCounter()
 end
@@ -38,6 +36,7 @@ end
 function Sounds:load()
   Sounds.musique = love.audio.newSource(dirpathMusic.."PuzzleEnergy16Bit.ogg", "stream")  
   Sounds.musique:setLooping(true)
+  Sounds.musique:setVolume(0)
   --
   Sounds.counter={}
   for n=1, 3 do
@@ -82,13 +81,16 @@ function Sounds:musiqueUpdate(dt)
       Sounds.musique:pause()
     end
   else
-    if Sounds.musique:getVolume() < Sounds.volumeMusic then
-      local volume = Sounds.musique:getVolume()+(dt*0.1)
-      if volume > 1 then volume = 1 end
-      Sounds.musique:setVolume(volume)
-    end
     if not Sounds.musique:isPlaying() then
       Sounds.musique:play()
+    end
+    if Sounds.musique:getVolume() < Sounds.volumeMusic then
+      Sounds.musique:setVolume(Sounds.musique:getVolume()+(dt/10))
+    elseif Sounds.musique:getVolume() > Sounds.volumeMusic then
+      Sounds.musique:setVolume(Sounds.musique:getVolume()-(dt/10))
+    end
+    if math.floor(Sounds.musique:getVolume()*100) == Sounds.volumeMusic then
+      Sounds.musique:setVolume(Sounds.volumeMusic)
     end
   end
 end
