@@ -60,17 +60,19 @@ function Menu:load()
   Menu:newButton( "Quitter" , function() love.event.quit() end )
   --
   Menu:open()
+  --
+  Sounds.musique:setVolume(0)
 end
 --
 
 function Menu:update(dt)
-  if Sounds.musique:getVolume() < 0.5 then
+  if Sounds.musique:getVolume() < Sounds.Music.volume then
     Sounds.musique:setVolume(Sounds.musique:getVolume()+(dt/10))
-  elseif Sounds.musique:getVolume() >= 0.5 then
+  elseif Sounds.musique:getVolume() >= Sounds.Music.volume then
     Sounds.musique:setVolume(Sounds.musique:getVolume()-(dt/10))
   end
-  if math.floor(Sounds.musique:getVolume()*100) == 50 then
-    Sounds.musique:setVolume(0.5)
+  if math.floor(Sounds.musique:getVolume()*100) == Sounds.Music.volume * 100 then
+    Sounds.musique:setVolume(Sounds.Music.volume)
   end
   --
   Game:getDimensions()

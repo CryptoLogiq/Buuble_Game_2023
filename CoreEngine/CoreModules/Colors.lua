@@ -1,5 +1,5 @@
-local Colors = require("coreEngine/Colors/data")
-Colors.listNameColor = require("coreEngine/Colors/name")
+local Colors = require("CoreEngine/Colors/data")
+Colors.listNameColor = require("CoreEngine/Colors/name")
 --
 
 function Colors:getName(pIndex)

@@ -9,7 +9,7 @@ Sounds.Sfx = {volume=0.2,type="Music"}
 function Sounds:newGame()
   Sounds:purgeList()
   --
-  Sounds.musique:setVolume(0.5)
+--  Sounds.musique:setVolume(0.5)
   --
   --Sounds:newCounter()
 end

@@ -15,7 +15,7 @@ Bubbles.readyLaunch = false
 local colorsBubbles = {{1,0,1,1},{0,1,0,1},{0,0,1,1},{0,0,0,1},{1,0,0,1}}
 
 function Bubbles:newBubble(x, y, isPlayer, World, grid)
-  local bub = {world=World, debug=false, isPlayer=isPlayer, isDead=false, listWall={}, isWall=true, grid=grid or nil, x=x, y=y, radius=32, ox=32, oy=32, speed=60, colorID=love.math.random(5), isLaunch=false}
+  local bub = {world=World, angle=math.rad(love.math.random(360)), debug=false, isPlayer=isPlayer, isDead=false, listWall={}, isWall=true, grid=grid or nil, x=x, y=y, radius=32, restitution=0.9, ox=32, oy=32, speed=60, force=1200, colorID=love.math.random(5), isLaunch=false}
   --
   bub.color=colorsBubbles[bub.colorID]
   bub.img = Bubbles.images[bub.colorID]
@@ -23,9 +23,9 @@ function Bubbles:newBubble(x, y, isPlayer, World, grid)
   bub.body = love.physics.newBody(World, bub.x, bub.y, "kinematic")
   bub.shape = love.physics.newCircleShape(bub.radius)
   bub.fixture = love.physics.newFixture(bub.body, bub.shape)
-  bub.fixture:setRestitution(0.9)
+  bub.fixture:setRestitution(bub.restitution)
   --
-  bub.timer={current=0, delai=180, speed=love.math.random(60,180)}
+  bub.timer={current=0, delai=180, speed=love.math.random(60,240)}
   --
   Bubbles.getFunctions(bub)
   --
@@ -79,16 +79,22 @@ function Bubbles.getFunctions(self)
 --
 
   function self:changeWorld(toWorld)
-    self.isDead = true
-    self.body:destroy()
-    --
+    -- Create new :
     local new = Bubbles:newBubble(self.x, self.y, false, toWorld) -- x, y, isPlayer, World, grid
+    -- set's
     new.colorID = self.colorID
     new.img = self.img
     new.group = Bubbles.listDestroy
-    --
+    -- physics
     new.body:setType("dynamic")
-    new.body:applyForce(love.math.random(-150,150), love.math.random(510,660))
+--    new.body:applyForce(love.math.random(-150,150), love.math.random(510,660))
+    local angle = self.body:getAngularVelocity()
+    local force = love.math.random(self.force*30, self.force*90)
+    new.body:applyForce( math.cos(angle) * force, math.sin(angle) * force)
+    --
+    -- ## destroy self
+    self.isDead = true
+    self.body:destroy()
     --
     if toWorld == WorldDestroy then
       Game:incrementeScore(10)
@@ -107,10 +113,12 @@ function Bubbles.getFunctions(self)
     if self.world == WorldGrid then
       if not self.isDead then 
         self:getIsWalled()
+        self.body:setAngle(self.angle)
       else
         Bubbles:purgeMeOnList(self, Bubbles.listDestroy)
       end
     elseif self.world == WorldDestroy then
+      self.angle = self.body:getAngle()
       if self:timerExplosion(dt) then
         Explosion:newExplosion(self.x, self.y, self.body:getAngle())
         self.body:destroy()
@@ -195,9 +203,14 @@ function Bubbles:launchBubble()
     --
     local cos = math.cos(Mouse.angle)
     local sin = math.sin(Mouse.angle)
-    Bubbles.game.body:setLinearVelocity(cos*Bubbles.game.speed*20, sin*Bubbles.game.speed*20)
+    Bubbles.game.body:setLinearVelocity(cos*Bubbles.game.force, sin*Bubbles.game.force)
     Bubbles.game.body:setType("dynamic")
     Bubbles.game.isLaunch = true
+    --
+    Bubbles.game.fixture:destroy()
+    Bubbles.game.shape = love.physics.newCircleShape(Bubbles.game.radius * 0.8)
+    Bubbles.game.fixture = love.physics.newFixture(Bubbles.game.body, Bubbles.game.shape)
+    Bubbles.game.fixture:setRestitution(Bubbles.game.restitution)
     --
     Game.isPlay = false
   end
@@ -206,39 +219,48 @@ end
 
 function Bubbles:updateBubblePlayer(dt)
   if Bubbles.game then
+    local bblaunch = Bubbles.game
     --
-    Bubbles.game.x, Bubbles.game.y = Bubbles.game.body:getPosition()
+    bblaunch.x, bblaunch.y = bblaunch.body:getPosition()
     --
-    if Bubbles.game.isLaunch then
+    if bblaunch.isLaunch then
       local isTouching = false
+      -- VS bubbles :
       for _, other in pairs(Bubbles.listGrid) do
-        if Bubbles.game.body:isTouching(other.body) then
+        if bblaunch.body:isTouching(other.body) then
           isTouching = true
           break
         end
       end
+      -- VS Wall Up :
       if not isTouching then
-        if Bubbles.game.body:isTouching(WallsMap.upGrid.body) then
+        if bblaunch.body:isTouching(WallsMap.upGrid.body) then
           isTouching = true
         end
       end
       if isTouching then
-        Bubbles.game.body:setLinearVelocity(0,0)
+        bblaunch.body:setLinearVelocity(0,0)
         --
-        Bubbles.game.grid = MapManager:getGrid(Bubbles.game.x, Bubbles.game.y)
-        Bubbles.game.x, Bubbles.game.y = Bubbles.game.grid.cx, Bubbles.game.grid.cy
-        Bubbles.game.body:setPosition(Bubbles.game.x, Bubbles.game.y)
-        Bubbles.game.isPlayer = false
-        Bubbles.game.body:setType("kinematic")
+        bblaunch.fixture:destroy()
+        bblaunch.shape = love.physics.newCircleShape(bblaunch.radius)
+        bblaunch.fixture = love.physics.newFixture(bblaunch.body, bblaunch.shape)
         --
-        Bubbles.game.isWall = true
+        bblaunch.grid = MapManager:getGrid(bblaunch.x, bblaunch.y)
+        bblaunch.x, bblaunch.y = bblaunch.grid.cx, bblaunch.grid.cy
+        bblaunch.body:setPosition(bblaunch.x, bblaunch.y)
+        bblaunch.isPlayer = false
+        bblaunch.body:setType("kinematic")
+        --
+        bblaunch.angle = bblaunch.body:getAngle()
+        --
+        bblaunch.isWall = true
         --
         Bubbles:createGroupColor()
         --
         Bubbles.readyLaunch = false
         --
-        if Bubbles.game.group then
-          local destroyBool, nbBubbles = Bubbles:impactGroup(Bubbles.game.x, Bubbles.game.y)
+        if bblaunch.group then
+          local destroyBool, nbBubbles = Bubbles:impactGroup(bblaunch.x, bblaunch.y)
           if destroyBool then
             if nbBubbles >= 5 then
               Sounds.correct:play()
@@ -250,7 +272,9 @@ function Bubbles:updateBubblePlayer(dt)
       end
     end
     --
+    
   end
+  
 end
 --
 
@@ -481,7 +505,8 @@ function Bubbles:drawList(list)
   end
 --
   for _, bub in ipairs(list) do
-    love.graphics.draw(bub.img.imgdata, bub.x, bub.y, bub.body:getAngle(),1,1, bub.ox, bub.oy)
+--    love.graphics.draw(bub.img.imgdata, bub.x, bub.y, bub.body:getAngle(),1,1, bub.ox, bub.oy)
+    love.graphics.draw(bub.img.imgdata, bub.x, bub.y, bub.angle,1,1, bub.ox, bub.oy)
   end
   --
   love.graphics.setColor(1,1,1,1)
@@ -508,6 +533,7 @@ function Bubbles:drawDebug(list)
       love.graphics.circle("line",bub.x, bub.y, 1)
       love.graphics.setColor(1,1,1,1)
     end
+    --
   end
 end
 --
