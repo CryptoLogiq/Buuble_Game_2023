@@ -8,7 +8,7 @@ function Menu:newButton(text, func)
   local colorSurvol={0.647,0.165,0.165,1}
   --
   local button = {x=Game.ox-200,y=startY,w=400,h=100, ox=200, oy=50, execute=func,color=color, colorDef=color, colorSurvol=colorSurvol}
-  button.text = {textsource=text, txtdata=love.graphics.newText(Game.font[40], text)}
+  button.text = {textsource=text, txtdata=love.graphics.newText(Font.Games[40], text)}
   button.text.w, button.text.h = button.text.txtdata:getDimensions()
   button.text.ox, button.text.oy = button.text.w/2, button.text.h/2
   button.text.color={0.1,0.2,0.3,0.8}

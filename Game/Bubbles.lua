@@ -1,4 +1,4 @@
-local Bubbles = {debug=true}
+local Bubbles = {debug=false}
 
 Bubbles.__index = Bubbles
 
@@ -91,6 +91,7 @@ function Bubbles.getFunctions(self)
     new.body:applyForce(love.math.random(-150,150), love.math.random(510,660))
     --
     if toWorld == WorldDestroy then
+      Game:incrementeScore(10)
       Bubbles:purgeMeOnList(self, Bubbles.listGrid)
     elseif toWorld == WorldGrid then
       Bubbles:purgeMeOnList(self, Bubbles.listDestroy)
@@ -241,6 +242,8 @@ function Bubbles:updateBubblePlayer(dt)
           if destroyBool then
             if nbBubbles >= 5 then
               Sounds.correct:play()
+              local score = math.floor(nbBubbles * 1.7)
+              Game:incrementeScore(score)
             end
           end
         end

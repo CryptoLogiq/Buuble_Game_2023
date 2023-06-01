@@ -1,7 +1,6 @@
-local Game = {debug=false, isStop=false, isPlay=false, gameover=false}
+local Game = {debug=false, isStop=false, isPlay=false, gameover=false, bestscore=false}
 
 Game.texts = {}
-Game.font = {}
 
 function Game:getDimensions()
   self.w, self.h = love.graphics.getDimensions()
@@ -23,14 +22,29 @@ function Game:newGame()
 end
 --
 
+function Game:updateBestScore(bestscore)
+  Game.bestscore = false
+  --
+  local score = Gui.ScoreGame.score
+  Gui.ScoreGame.score = 0
+  --
+  if score >= Gui.ScoreGame.bestscore then
+    Gui.ScoreGame.bestscore = score
+    Game.bestscore = true
+  end
+end
+--
+
+function Game:incrementeScore(score)
+  Gui.ScoreGame.score = Gui.ScoreGame.score + score
+end
+--
+
 --
 function Game:load()
   Game:getDimensions()
   --
-  for  n=1, 100 do
-    table.insert(Game.font , love.graphics.newFont("ressources/fonts/Games.ttf", n) )
-  end
-  Game.texts.isStop = {txtdata = love.graphics.newText(Game.font[50], "WAITING")}
+  Game.texts.isStop = {txtdata = love.graphics.newText(Font.Games[50], "WAITING")}
   Game.texts.isStop.w, Game.texts.isStop.h = Game.texts.isStop.txtdata:getDimensions()
   Game.texts.isStop.ox, Game.texts.isStop.oy = Game.texts.isStop.w/2, Game.texts.isStop.h/2
   Game.texts.isStop.color = {0,1,0,1}

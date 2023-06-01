@@ -9,11 +9,18 @@ local dirpath = "CoreEngine/CoreModules/"
 local filesTable = love.filesystem.getDirectoryItems(dirpath)
 
 function CoreLoader:load()
-  -- For All
+  -- For All :
+  -- globals
   require(dirpath.."Globals")
+  -- fonts
+  require(dirpath.."Fonts")
+  -- colors
   Core.Colors = require(dirpath.."Colors")
 
-  -- Libs independante
+
+  -- Libs independantes :
+  
+  -- camera
   Core.Gamera = require(dirpath.."Gamera")
 
   -- Prio order require for work

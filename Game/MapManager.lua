@@ -145,14 +145,6 @@ end
 --
 
 function MapManager:draw()
-  -- bordures
-  love.graphics.setColor(0,0,0,0.25)
-  for n=1, #MapManager.current.bordures do
-    local rect = MapManager.current.bordures[n]
-    love.graphics.rectangle(rect.mode,rect.x,rect.y,rect.w,rect.h,5)
-  end
-  love.graphics.setColor(1,1,1,1)
-
   -- debug
   if Game.debug then
     -- grilles
