@@ -474,9 +474,17 @@ end
 --
 
 function Bubbles:drawList(list)
+  if list == Bubbles.listGrid then
+    love.graphics.setColor(1,1,1,1)
+  elseif list == Bubbles.listDestroy then
+    love.graphics.setColor(Game.colorFade)
+  end
+--
   for _, bub in ipairs(list) do
     love.graphics.draw(bub.img.imgdata, bub.x, bub.y, 0,1,1, bub.ox, bub.oy)
   end
+  --
+  love.graphics.setColor(1,1,1,1)
 end
 --
 

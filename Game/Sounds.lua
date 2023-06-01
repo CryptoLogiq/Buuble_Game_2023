@@ -3,8 +3,8 @@ local Sounds = {debug=false, list={}, current=nil}
 local dirpathMusic = "ressources/musiques/"
 local dirpathSfx = "ressources/sounds/"
 
-Sounds.Music = {volume=0.8,type="Music"}
-Sounds.Sfx = {volume=0.8,type="Music"}
+Sounds.Music = {volume=0.3,type="Music"}
+Sounds.Sfx = {volume=0.2,type="Music"}
 
 function Sounds:newGame()
   Sounds:purgeList()

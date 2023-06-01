@@ -1,5 +1,7 @@
 local Explosion = {debug=false, list={}}
 
+Explosion.images = {}
+
 local sensRot = {-1, 1}
 
 function Explosion:createNewExplosion(x,y)
@@ -8,12 +10,14 @@ function Explosion:createNewExplosion(x,y)
     y=y,
     frame=1,
     sound=Sounds.explodeBubble[love.math.random(#Sounds.explodeBubble)]:clone(),
-    rotate=sensRot[love.math.random(#sensRot)],
-    timer={current=0, delai=30, speed=love.math.random(90,120)} -- ICI
+    rotate= math.rad(love.math.random(360)),
+    rotateSens=sensRot[love.math.random(#sensRot)],
+    speedRot=love.math.random(60,600),
+    timer={current=0, delai=30, speed=love.math.random(90,240)} -- ICI
   }
   --
   function explo:update(dt)
-    explo.rotate = explo.rotate + (explo.timer.speed * dt)
+    explo.rotate = explo.rotate + (explo.rotateSens * explo.speedRot * dt) -- radian + ( 1 or -1 * speed * dt)
     explo.timer.current = explo.timer.current + (explo.timer.speed * dt)
     if explo.timer.current >= explo.timer.delai then
       explo.timer.current = 0
@@ -68,11 +72,13 @@ end
 --
 
 function Explosion:draw()
+  love.graphics.setColor(Game.colorFade)
   for _, explo in ipairs(Explosion.list) do
     if not explo.isDestroy then
-      love.graphics.draw(Explosion.images.imgdata, Explosion.images[explo.frame].quad, explo.x, explo.y,0, 2,2)
+      love.graphics.draw(Explosion.images.imgdata, Explosion.images[explo.frame].quad, explo.x, explo.y, math.rad(explo.rotate), 2,2, Explosion.images[explo.frame].ox, Explosion.images[explo.frame].oy )
     end
   end
+  love.graphics.setColor(1,1,1,1)
 end
 --
 

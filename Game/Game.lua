@@ -2,6 +2,8 @@ local Game = {debug=false, isStop=false, isPlay=false, gameover=false, bestscore
 
 Game.texts = {}
 
+Game.colorFade = {1,1,1,0.8}
+
 function Game:getDimensions()
   self.w, self.h = love.graphics.getDimensions()
   self.ox, self.oy = self.w/2, self.h/2
