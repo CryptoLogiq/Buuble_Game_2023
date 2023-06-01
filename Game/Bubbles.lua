@@ -112,7 +112,7 @@ function Bubbles.getFunctions(self)
       end
     elseif self.world == WorldDestroy then
       if self:timerExplosion(dt) then
-        Explosion:newExplosion(self.x, self.y)
+        Explosion:newExplosion(self.x, self.y, self.body:getAngle())
         self.body:destroy()
         Bubbles:purgeMeOnList(self, Bubbles.listDestroy)
       end
@@ -481,7 +481,7 @@ function Bubbles:drawList(list)
   end
 --
   for _, bub in ipairs(list) do
-    love.graphics.draw(bub.img.imgdata, bub.x, bub.y, 0,1,1, bub.ox, bub.oy)
+    love.graphics.draw(bub.img.imgdata, bub.x, bub.y, bub.body:getAngle(),1,1, bub.ox, bub.oy)
   end
   --
   love.graphics.setColor(1,1,1,1)

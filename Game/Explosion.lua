@@ -2,17 +2,17 @@ local Explosion = {debug=false, list={}}
 
 Explosion.images = {}
 
-local sensRot = {-1, 1}
+--local sensRot = {-1, 1}
 
-function Explosion:createNewExplosion(x,y)
+function Explosion:createNewExplosion(x, y, angle)
   local explo = {
     x=x,
     y=y,
     frame=1,
     sound=Sounds.explodeBubble[love.math.random(#Sounds.explodeBubble)]:clone(),
-    rotate= math.rad(love.math.random(360)),
-    rotateSens=sensRot[love.math.random(#sensRot)],
-    speedRot=love.math.random(60,600),
+    rotate= angle,
+    rotateSens=math.cos(angle),
+    speedRot=love.math.random(60,360),
     timer={current=0, delai=30, speed=love.math.random(90,240)} -- ICI
   }
   --
@@ -31,11 +31,15 @@ function Explosion:createNewExplosion(x,y)
 end
 --
 
-function Explosion:newExplosion(x,y)
-  Explosion:createNewExplosion(x,y)
+function Explosion:newExplosion(x, y, angle)
+  Explosion:createNewExplosion(x, y, angle)
   --
   for n=love.math.random(5), 1, -1 do
-    Explosion:createNewExplosion(love.math.random(x-16,x+16),love.math.random(y-16,y+16))
+    Explosion:createNewExplosion(
+      love.math.random(x-16,x+16),
+      love.math.random(y-16,y+16),
+      angle + ( math.cos(angle) + math.rad(love.math.random(360)) )
+      )
   end
 end
 --
