@@ -18,6 +18,8 @@ function Game:newGame()
   Bubbles:newGame()
   Sounds:newGame()
   Explosion:newGame()
+  --
+  Gui:load()
 end
 --
 
@@ -26,7 +28,7 @@ function Game:load()
   Game:getDimensions()
   --
   for  n=1, 100 do
-  table.insert(Game.font , love.graphics.newFont("ressources/fonts/Games.ttf", n) )
+    table.insert(Game.font , love.graphics.newFont("ressources/fonts/Games.ttf", n) )
   end
   Game.texts.isStop = {txtdata = love.graphics.newText(Game.font[50], "WAITING")}
   Game.texts.isStop.w, Game.texts.isStop.h = Game.texts.isStop.txtdata:getDimensions()
@@ -36,7 +38,8 @@ end
 --
 
 function Game:update(dt)
-
+  Gui:update(dt)
+  --
   Game:getDimensions(dt)
   BackGround:update(dt)
   Controllers:update(dt)
@@ -60,6 +63,7 @@ function Game:draw()
   Bubbles:draw()
   Explosion:draw()
   --
+  Gui:draw()
   Sounds:draw()
   --
   if Game.isStop then

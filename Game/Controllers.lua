@@ -110,8 +110,10 @@ end
 
 function Controllers:mousepressed(x,y,button)
   if Game.isPlay then
-    Bubbles:launchBubble()
---    Bubbles:destroyMouse(x,y)
+    local map = MapManager.current
+    if CheckCollision(map.x, map.y, map.w, map.h,   x,y,1,1) then
+      Bubbles:launchBubble()
+    end
   end
 end
 --

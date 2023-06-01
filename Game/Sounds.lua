@@ -3,8 +3,8 @@ local Sounds = {debug=false, list={}, current=nil}
 local dirpathMusic = "ressources/musiques/"
 local dirpathSfx = "ressources/sounds/"
 
-Sounds.volumeMusic = 0.8
-Sounds.volumeSfx = 1
+Sounds.Music = {volume=0.8,type="Music"}
+Sounds.Sfx = {volume=0.8,type="Music"}
 
 function Sounds:newGame()
   Sounds:purgeList()
@@ -33,6 +33,36 @@ function Sounds:newCounter()
 end
 --
 
+function Sounds:setVolume(pRef)
+  if pRef == Sounds.Music then -- musique
+    Sounds.musique:setVolume(Sounds.Music.volume)
+  elseif pRef == Sounds.Sfx then    -- Sfx
+    for n=1, 3 do
+      local counter = Sounds.counter[n]
+      counter:setVolume(Sounds.Sfx.volume)
+    end
+    --
+    Sounds.go:setVolume(Sounds.Sfx.volume)
+    --
+    Sounds.correct:setVolume(Sounds.Sfx.volume)
+    --
+    Sounds.levelup:setVolume(Sounds.Sfx.volume)
+    --
+    Sounds.newhightscore:setVolume(Sounds.Sfx.volume)
+    --
+    Sounds.gameover:setVolume(Sounds.Sfx.volume)
+    --
+
+    Sounds.launchBubble:setVolume(Sounds.Sfx.volume)
+    --
+    for n=1, 2 do
+      local explode = Sounds.explodeBubble[n]
+      explode:setVolume(Sounds.Sfx.volume)
+    end
+  end
+end
+--
+
 function Sounds:load()
   Sounds.musique = love.audio.newSource(dirpathMusic.."PuzzleEnergy16Bit.ogg", "stream")  
   Sounds.musique:setLooping(true)
@@ -41,33 +71,33 @@ function Sounds:load()
   Sounds.counter={}
   for n=1, 3 do
     local counter = love.audio.newSource(dirpathSfx.."counter_"..n..".ogg", "stream")
-    counter:setVolume(Sounds.volumeSfx)
+    counter:setVolume(Sounds.Sfx.volume)
     table.insert(Sounds.counter,  counter)
   end
   --
   Sounds.go = love.audio.newSource(dirpathSfx.."go.ogg", "stream")
-  Sounds.go:setVolume(Sounds.volumeSfx)
+  Sounds.go:setVolume(Sounds.Sfx.volume)
   --
   Sounds.correct = love.audio.newSource(dirpathSfx.."correct.ogg", "stream")
-  Sounds.correct:setVolume(Sounds.volumeSfx)
+  Sounds.correct:setVolume(Sounds.Sfx.volume)
   --
   Sounds.levelup = love.audio.newSource(dirpathSfx.."level_up.ogg", "stream")
-  Sounds.levelup:setVolume(Sounds.volumeSfx)
+  Sounds.levelup:setVolume(Sounds.Sfx.volume)
   --
   Sounds.newhightscore = love.audio.newSource(dirpathSfx.."new_highscore.ogg", "stream")
-  Sounds.newhightscore:setVolume(Sounds.volumeSfx)
+  Sounds.newhightscore:setVolume(Sounds.Sfx.volume)
   --
   Sounds.gameover = love.audio.newSource(dirpathSfx.."game_over.ogg", "stream")
-  Sounds.gameover:setVolume(Sounds.volumeSfx)
+  Sounds.gameover:setVolume(Sounds.Sfx.volume)
   --
 
   Sounds.launchBubble = love.audio.newSource(dirpathSfx.."ballon_launch.mp3", "stream")
-  Sounds.launchBubble:setVolume(Sounds.volumeSfx)
+  Sounds.launchBubble:setVolume(Sounds.Sfx.volume)
   --
   Sounds.explodeBubble = {}
   for n=1, 2 do
     local explode = love.audio.newSource(dirpathSfx.."ballon_explode"..n..".mp3", "stream")
-    explode:setVolume(Sounds.volumeSfx)
+    explode:setVolume(Sounds.Sfx.volume)
     table.insert(Sounds.explodeBubble,  explode)
   end
 
@@ -84,13 +114,13 @@ function Sounds:musiqueUpdate(dt)
     if not Sounds.musique:isPlaying() then
       Sounds.musique:play()
     end
-    if Sounds.musique:getVolume() < Sounds.volumeMusic then
+    if Sounds.musique:getVolume() < Sounds.Music.volume then
       Sounds.musique:setVolume(Sounds.musique:getVolume()+(dt/10))
-    elseif Sounds.musique:getVolume() > Sounds.volumeMusic then
+    elseif Sounds.musique:getVolume() > Sounds.Music.volume then
       Sounds.musique:setVolume(Sounds.musique:getVolume()-(dt/10))
     end
-    if math.floor(Sounds.musique:getVolume()*100) == Sounds.volumeMusic then
-      Sounds.musique:setVolume(Sounds.volumeMusic)
+    if math.floor(Sounds.musique:getVolume()*100) == Sounds.Music.volume then
+      Sounds.musique:setVolume(Sounds.Music.volume)
     end
   end
 end

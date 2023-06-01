@@ -1,4 +1,4 @@
-local Bubbles = {debug=false}
+local Bubbles = {debug=true}
 
 Bubbles.__index = Bubbles
 
@@ -6,18 +6,19 @@ Bubbles.listGrid = {}
 
 Bubbles.listDestroy = {}
 
-Bubbles.listIsWall = {}
-
 Bubbles.images = {}
 
 Bubbles.game = nil
 
 Bubbles.readyLaunch = false
 
+local colorsBubbles = {{1,0,1,1},{0,1,0,1},{0,0,1,1},{0,0,0,1},{1,0,0,1}}
+
 function Bubbles:newBubble(x, y, isPlayer, World, grid)
-  local bub = {world=World, debug=false, isPlayer=isPlayer, isDestroy=false, listWall={}, isWall=true, grid=grid or nil, x=x, y=y, radius=32, ox=32, oy=32, speed=60, color=love.math.random(5), isLaunch=false}
+  local bub = {world=World, debug=false, isPlayer=isPlayer, isDead=false, listWall={}, isWall=true, grid=grid or nil, x=x, y=y, radius=32, ox=32, oy=32, speed=60, colorID=love.math.random(5), isLaunch=false}
   --
-  bub.img = Bubbles.images[bub.color]
+  bub.color=colorsBubbles[bub.colorID]
+  bub.img = Bubbles.images[bub.colorID]
   --
   bub.body = love.physics.newBody(World, bub.x, bub.y, "kinematic")
   bub.shape = love.physics.newCircleShape(bub.radius)
@@ -28,7 +29,6 @@ function Bubbles:newBubble(x, y, isPlayer, World, grid)
   --
   Bubbles.getFunctions(bub)
   --
-
   if World == WorldGrid then
     table.insert(Bubbles.listGrid, bub)
   elseif World == WorldDestroy then
@@ -47,7 +47,7 @@ function Bubbles.getFunctions(self)
       if other ~= self then
         local dist = math.dist(self.x, self.y, other.x, other.y)
         if dist <= 75 then
-          if self.color == other.color then
+          if self.colorID == other.colorID then
             if not self.group then self.group = {} end
             table.insert(self.group, other)
           end
@@ -57,58 +57,63 @@ function Bubbles.getFunctions(self)
   end
   --
 
-  function self:getIsProxWithOtherBubble()
-    if not self.isPlayer and self.isDestroy == false then
+  function self:getIsWalled()
+    if self.grid and not self.isDead then -- not self.isPlayer and
       if self.grid.lig == 1 then
-        self.isWall = true
-        if not Bubbles:getBubbleInList(self, Bubbles.listIsWall) then
-          table.insert(Bubbles.listIsWall, self)
-        end
+        self.isDestroyed = true
       end
       for _, other in ipairs(Bubbles.listGrid) do
-        if other ~= self and not other.isDestroy then
+        if other ~= self and not other.isDead then
           local dist = math.dist(self.x, self.y, other.x, other.y)
           if dist <= 80 then
             if self.isWall then
               other.isWall = true
-            end
-            if not Bubbles:getBubbleInList(self, Bubbles.listIsWall) then
-              table.insert(Bubbles.listIsWall, self)
+            elseif other.isWall then
+              self.isWall = true
             end
           end
         end
       end
     end
-    return false
   end
 --
 
-  function self:changeWorld(world)
-    self.isDestroy = true
+  function self:changeWorld(toWorld)
+    self.isDead = true
     self.body:destroy()
     --
-    local new = Bubbles:newBubble(self.x, self.y, false, world) -- x, y, isPlayer, World, grid
-    new.color = self.color
-    new.img = Bubbles.images[self.color]
+    local new = Bubbles:newBubble(self.x, self.y, false, toWorld) -- x, y, isPlayer, World, grid
+    new.colorID = self.colorID
+    new.img = self.img
     new.group = Bubbles.listDestroy
     --
     new.body:setType("dynamic")
     new.body:applyForce(love.math.random(-150,150), love.math.random(510,660))
+    --
+    if toWorld == WorldDestroy then
+      Bubbles:purgeMeOnList(self, Bubbles.listGrid)
+    elseif toWorld == WorldGrid then
+      Bubbles:purgeMeOnList(self, Bubbles.listDestroy)
+    end
   end
 --
 
   function self:update(dt)
-    if not self.destroy then
+    if not self.isDead then
       self.x, self.y = self.body:getPosition()
     end
     --
-    if not self.destroy and self.world == WorldGrid then
-      self:getIsProxWithOtherBubble()
+    if self.world == WorldGrid then
+      if not self.isDead then 
+        self:getIsWalled()
+      else
+        Bubbles:purgeMeOnList(self, Bubbles.listDestroy)
+      end
     elseif self.world == WorldDestroy then
       if self:timerExplosion(dt) then
         Explosion:newExplosion(self.x, self.y)
         self.body:destroy()
-        Bubbles:purgeList(self, Bubbles.listDestroy)
+        Bubbles:purgeMeOnList(self, Bubbles.listDestroy)
       end
     end
   end
@@ -140,8 +145,6 @@ end
 --
 
 function Bubbles:createNewLigneBubbles(nbLig)
-  Bubbles.listGrid = {}
-  Bubbles.listDestroy = {}
   --
   Game.isPlay = false
   --
@@ -158,8 +161,8 @@ end
 
 function Bubbles:destroyGroup(groupList)
   for _, bubble in ipairs(groupList) do
-    bubble:changeWorld(WorldDestroy)-- tag isDestroy and create new bubble in WorldDestroy :
-    Bubbles:purgeList(bubble, Bubbles.listGrid)
+    bubble:changeWorld(WorldDestroy)-- tag isDead and create new bubble in WorldDestroy :
+    Bubbles:purgeMeOnList(bubble, Bubbles.listGrid)
   end
 end
 --
@@ -227,13 +230,15 @@ function Bubbles:updateBubblePlayer(dt)
         Bubbles.game.isPlayer = false
         Bubbles.game.body:setType("kinematic")
         --
+        Bubbles.game.isWall = true
+        --
         Bubbles:createGroupColor()
         --
         Bubbles.readyLaunch = false
         --
         if Bubbles.game.group then
-          local destroy, nbBubbles = Bubbles:impactGroup(Bubbles.game.x, Bubbles.game.y)
-          if destroy then
+          local destroyBool, nbBubbles = Bubbles:impactGroup(Bubbles.game.x, Bubbles.game.y)
+          if destroyBool then
             if nbBubbles >= 5 then
               Sounds.correct:play()
             end
@@ -249,8 +254,9 @@ end
 function Bubbles:impactGroup(x,y)
 
   --
-  for _, bub in ipairs(Bubbles.listGrid) do
-    if bub.grid and bub.color == Bubbles.game.color then
+  for n=#Bubbles.listGrid, 1, -1 do
+    local bub = Bubbles.listGrid[n]
+    if bub.grid and bub.colorID == Bubbles.game.colorID then
       local dist = math.dist(x, y, bub.x, bub.y)
       if dist <= 80 then
         if bub.group then
@@ -318,8 +324,7 @@ end
 
 function Bubbles:load()
   for n=1, 5 do
-    local bubImg = Core.ImageManager.newImage("ressources/images/bubble_"..n..".png")
-    table.insert(Bubbles.images, bubImg)
+    table.insert(Bubbles.images, Core.ImageManager.newImage("ressources/images/bubble_"..n..".png"))
   end
 end
 --
@@ -356,19 +361,21 @@ end
 
 function Bubbles:createGroupColor()
   -- On purge les bub's group's :
-  for _, bub in ipairs(Bubbles.listGrid) do
+  for n=#Bubbles.listGrid, 1, -1 do
+    local bub = Bubbles.listGrid[n]
     if bub.group then bub.group = nil end
   end
 
   -- On attachs les bub's to group's de meme couleur qui sont a proximité :
-  for _, bub in ipairs(Bubbles.listGrid) do
+  for n=#Bubbles.listGrid, 1, -1 do
+    local bub = Bubbles.listGrid[n]
     bub:getGroup()
   end
 end
 --
 
 
-function Bubbles:purgeList(bubble, list)
+function Bubbles:purgeMeOnList(bubble, list)
   for n=#list, 1, -1 do
     local search = list[n]
     if search == bubble then
@@ -385,12 +392,39 @@ function Bubbles.sortOrder(list)
 end
 --
 
+function Bubbles:updateGetIsWalled()
+  local map = MapManager.current
+  local mapTest = {}
+  for l=1, map.lig do mapTest[l]={} end
+
+  for n=#Bubbles.listGrid, 1, -1 do
+    local bubble = Bubbles.listGrid[n]
+    bubble.isWall = false
+    if not bubble.isPlayer and not bubble.isDead and bubble.grid then
+      if bubble.grid.lig == 1 then
+        bubble.isWall = true
+      end
+      table.insert(mapTest[bubble.grid.lig], bubble)
+    end
+  end
+
+  for l=1, #mapTest do
+    for index=1, #mapTest[l] do
+      local bubble = mapTest[l][index]
+      bubble:getIsWalled()
+    end
+  end
+
+  mapTest = {}
+
+end
+--
+
 function Bubbles:update(dt)
 
-  -- reset isWall :
-  for _, bubble in ipairs(Bubbles.listGrid) do
-    bubble.isWall = false
-  end
+  -- isWall :
+  Bubbles:updateGetIsWalled()
+
 
   -- in grid :
   Bubbles.sortOrder(Bubbles.listGrid)
@@ -399,9 +433,10 @@ function Bubbles:update(dt)
     bubble:update(dt)
   end
 
-  -- if isWall ? ok go destroy me :
-  for _, bubble in ipairs(Bubbles.listGrid) do
-    if not bubble.isWall and not bubble.isPlayer then
+  -- if not isWall ? ok go to change me to WorldDestroy :
+  for n=#Bubbles.listGrid, 1, -1 do
+    local bubble = Bubbles.listGrid[n]
+    if not bubble.isWall and not bubble.isPlayer and not bubble.isDead then
       -- si il n'y pas de bubble a proximite alors :
       bubble:changeWorld(WorldDestroy)
     end
@@ -409,13 +444,15 @@ function Bubbles:update(dt)
 
 
   -- Purge Destroy list
-  for _, self in ipairs(Bubbles.listGrid) do
-    if self.isDestroy then
-      Bubbles:purgeList(self, Bubbles.listGrid)
+  for n=#Bubbles.listGrid, 1, -1 do
+    local bubble = Bubbles.listGrid[n]
+    if self.isDead then
+      if self.body then self.body:destroy() end
+      table.remove(Bubbles.listGrid, n)
     end
   end
 
-  -- update bubble go destroy
+  -- update bubble get isDead ?
   for _, bubble in ipairs(Bubbles.listDestroy) do
     bubble:update(dt)
   end
@@ -442,24 +479,23 @@ end
 
 function Bubbles:drawDebug(list)
   --
-  for _, bub in ipairs(list) do
-    if bub.debug then
-      love.graphics.setColor(1,0,0,1)
-      if bub.group then
-        for _, other in ipairs(bub.group) do
-          love.graphics.line(bub.x, bub.y, other.x, other.y)
-        end
-      end
+  if Bubbles.debug then
+    for _, bub in ipairs(list) do
       if bub.isWall then
         love.graphics.setColor(1,0,0,0.5)
         love.graphics.circle("fill",bub.x, bub.y, bub.radius/2)
         love.graphics.circle("line",bub.x, bub.y, bub.radius+1)
       end
+      if bub.group then
+        love.graphics.setColor(bub.color)
+        for _, other in ipairs(bub.group) do
+          love.graphics.line(bub.x, bub.y, other.x, other.y)
+        end
+      end
       -- center of bub
       love.graphics.setColor(1,0,1,1)
       love.graphics.circle("line",bub.x, bub.y, 1)
       love.graphics.setColor(1,1,1,1)
-      id=id+1
     end
   end
 end

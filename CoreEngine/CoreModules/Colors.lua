@@ -21,4 +21,9 @@ function Colors:getIndex(pName)
 end
 --
 
+for n=1, #Colors do
+Colors[Colors.listNameColor[n]] = Colors[n]
+end
+--
+
 return Colors
