@@ -2,7 +2,7 @@
 local debug = true
 
 -- settings
-love.graphics.setDefaultFilter( 'nearest', 'nearest' )
+--love.graphics.setDefaultFilter( 'nearest', 'nearest' )
 --love.graphics.setDefaultFilter( 'nearest' )
 love.physics.setMeter(64)
 WorldGrid = love.physics.newWorld(0,0,false)
@@ -23,7 +23,7 @@ Gui = require("Game/Gui")
 
 -- Many Scenes used (Intro/Menu/Game/etc.) :
 Game = require("Game/Game")
-Menu = require("Menu/Menu")
+Menu = require("Game/Menu")
 
 -- add scenes to SceneManager
 Core.Scene.newScene(Game, "Game")
@@ -32,12 +32,10 @@ Core.Scene.newScene(Menu, "Menu")
 function love.load()
   -- preload first
   Core.Scene.setScene(Menu)
-  
+
   -- need first load for dependencies
   Sounds:load()
   Game:load() 
-  -- other scenes
-  Menu:load()
 
   --
   Bubbles:load()
@@ -48,7 +46,11 @@ function love.load()
   --
   WallsMap:load()
   Controllers:load()
-  --
+  -- last :
+  Game:newGame()
+  
+  -- other scenes
+  Menu:load()
 end
 --
 

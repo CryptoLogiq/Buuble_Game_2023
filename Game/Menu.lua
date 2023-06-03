@@ -2,6 +2,8 @@ local Menu = {debug=false}
 
 Menu.listButtons = {}
 
+local ButtonPlay, ButtonQuit
+
 function Menu:newButton(text, func)
   local startY = Game.oy - 200
   local color={0.627,0.322,0.176,1}
@@ -13,12 +15,14 @@ function Menu:newButton(text, func)
   button.text.ox, button.text.oy = button.text.w/2, button.text.h/2
   button.text.color={0.1,0.2,0.3,0.8}
   --
-  button.y = startY + ((#Menu.listButtons +1) * 110)
+  button.y = startY + (#Menu.listButtons * 210)
   --
   button.cx = button.x + button.ox
   button.cy = button.y + button.oy
   --
   table.insert(Menu.listButtons, button)
+
+  return button
 end
 --
 
@@ -56,8 +60,12 @@ end
 --
 
 function Menu:load()
-  Menu:newButton( "Jouer" , function() Game:newGame() ; Core.Scene.setScene(Game) end )
-  Menu:newButton( "Quitter" , function() love.event.quit() end )
+  ButtonPlay = Menu:newButton( "Jouer" , function() if Game.StartNewGame then Game:newGame() end ; Core.Scene.setScene(Game) end )
+  ButtonPlay.colorDef = {0.42,0.557,0.137,1}
+  ButtonPlay.colorSurvol = {0,1,0.498,1}
+  ButtonQuit = Menu:newButton( "Quitter" , function() love.event.quit() end )
+  ButtonQuit.colorDef = {0.647,0.165,0.165,1}
+  ButtonQuit.colorSurvol = {0.863,0.078,0.235,1}
   --
   Menu:open()
   --
@@ -82,6 +90,8 @@ function Menu:update(dt)
   Controllers:update(dt)
 --  Sounds:update(dt)
   Explosion:update(dt)
+  --
+  Gui:update(dt)
 end
 --
 
@@ -94,6 +104,8 @@ function Menu:draw()
   --
   Menu:drawButtons()
   --
+  Gui:draw()
+  --
   Controllers:draw()
   --
   Sounds:draw()
@@ -102,9 +114,6 @@ end
 --
 
 function Menu:keypressed(key)
-  if key == "escape" then
-    love.event.quit()
-  end
 end
 --
 

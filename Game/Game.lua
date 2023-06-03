@@ -132,7 +132,8 @@ function Game:keypressed(key)
   if key == "pause" then
     Game.isStop = not Game.isStop
   elseif key == "escape" then
-    love.event.quit()
+    -- Menu
+    Core.Scene.setScene(Menu)
   end
   BackGround:keypressed(key)
   MapManager:keypressed(key)

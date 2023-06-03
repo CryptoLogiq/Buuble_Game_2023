@@ -13,9 +13,9 @@ end
 --
 
 function Sounds:purgeList()
-  for _, sound in ipairs(Sounds.list) do
-    sound.source:stop()
-    sound.source:release()
+  for n=#Sounds.list, 1, -1 do
+    local sound = Sounds.list[n]
+    sound:stop()
   end
   Sounds.list={}
 end

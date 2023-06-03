@@ -576,6 +576,8 @@ end
 --
 
 function Bubbles:newGame()
+  Bubbles.game = nil
+  --
   Bubbles:resetList(Bubbles.listGrid)
   Bubbles:resetList(Bubbles.listDestroy)
   --

@@ -54,11 +54,15 @@ function ligneRail:update(dt)
     curseurGrid.isLimit = true
     curseurGrid.x = self.x + math.cos(self.rotate) * self.maxdistance
     curseurGrid.y = self.y + math.sin(self.rotate) * self.maxdistance
-
   else
     curseurGrid.isLimit = false
     curseurGrid.x = Mouse.x
     curseurGrid.y = Mouse.y
+  end
+  if not Game.isStop and curseurGrid.isLimit then
+    if not Mouse.inMap then
+      Mouse.setPosition(curseurGrid.x, curseurGrid.y)
+    end
   end
   --
   Mouse.angle = self.rotate
