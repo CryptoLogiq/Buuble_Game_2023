@@ -1,9 +1,9 @@
-local MapManager = {debug=true, current=nil}
+local MapManager = {debug=false, current=nil}
 
 local listMapManagers = {}
 
 function MapManager:newGame()
-  MapManager.current = MapManager:new(13, 15)
+  MapManager.current = MapManager:new(13, 18)
   MapManager.current.nbGridOnScreen = 3
 end
 --
