@@ -32,7 +32,20 @@ function WallsMap:load()
   -- down
   WallsMap.downGrid, WallsMap.downDestroy = WallsMap:new(Game.ox, Game.h, map.w+10, 10)
 
+-- down Grid OFF for collision :
+  WallsMap.downGrid.body:setActive(false)
 
+end
+--
+
+function WallsMap:newGame()
+  for _, wall in ipairs(self.list) do
+    wall.body:destroy()
+    wall = nil
+  end
+  self.list={}
+  --
+  WallsMap:load()
 end
 --
 

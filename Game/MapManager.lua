@@ -3,7 +3,7 @@ local MapManager = {debug=true, current=nil}
 local listMapManagers = {}
 
 function MapManager:newGame()
-  MapManager.current = MapManager:new(12, 18)
+  MapManager.current = MapManager:new(13, 15)
   MapManager.current.nbGridOnScreen = 3
 end
 --
@@ -11,10 +11,12 @@ end
 function MapManager:new(lig, col)
   local cellW = 64
   local cellH = 64
-  local ox = 32
-  local oy = 32
-  local w = (cellW * col) + ox
+  local cellOX = 32
+  local cellOY = 32
+  local w = (cellW * col) + cellOX
   local h = cellH * lig
+  local ox = w/2
+  local oy = h/2
   --
   local startY = 0
   local startX = (Game.w/2)-(w/2)
@@ -25,7 +27,7 @@ function MapManager:new(lig, col)
   local rectRight = {mode="fill", x=Game.w-decX, y=0, w=decX, h=Game.h}
   --
   local dec = true
-  local x=startX+ox
+  local x=startX+cellOX
   local y=startY
   --  --
   local map = {
@@ -38,6 +40,8 @@ function MapManager:new(lig, col)
     h=h,
     ox=ox,
     oy=oy,
+    cellOX=cellOX,
+    cellOY=cellOY,
     lig=lig,
     col=col,
     decX=decX,
@@ -50,13 +54,13 @@ function MapManager:new(lig, col)
     map[l]={}
     for c=1, col do
       -- grid :
-      map[l][c]= {isFree=true, x=x, y=y, w=w, h=h, ox=ox, oy=oy, cx=x+ox, cy=y+oy, lig=l, col=c}
+      map[l][c]= {isFree=true, x=x, y=y, w=w, h=h, cellOX=cellOX, cellOY=cellOY, cx=x+cellOX, cy=y+cellOY, lig=l, col=c}
       --
       x=x+cellW
     end
     dec = not dec
     if dec then
-      x=startX+ox
+      x=startX+cellOX
     else
       x=startX
     end
@@ -77,7 +81,7 @@ function MapManager:changeOffset()
   --
   local x = 0
   if pLeft then
-    x = map.startX + map.ox
+    x = map.startX + map.cellOX
   else
     x = map.startX
   end
@@ -86,12 +90,12 @@ function MapManager:changeOffset()
     for c=1, map.col do
       local grid = map[l][c]
       grid.x = x + map.cellW
-      grid.cx = x + map.ox
+      grid.cx = x + map.cellOX
       x = x + map.cellW
     end
     pLeft = not pLeft
     if pLeft then
-      x = map.startX + map.ox
+      x = map.startX + map.cellOX
     else
       x = map.startX
     end
@@ -151,7 +155,7 @@ function MapManager:draw()
     for l=1, MapManager.current.lig do
       for c=1, MapManager.current.col do
         local grid = MapManager.current[l][c]
-        love.graphics.circle("line",grid.cx,grid.cy,grid.ox)
+        love.graphics.circle("line",grid.cx,grid.cy,grid.cellOX)
         love.graphics.print("l:"..grid.lig.."\n".."c:"..grid.col, grid.cx, grid.cy,0,1,1,0,12)
       end
     end

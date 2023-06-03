@@ -1,4 +1,5 @@
 Mouse = love.mouse
+Mouse.w, Mouse.h = 1, 1
 
 function Mouse:update()
   self.x, self.y = self:getPosition()

@@ -9,7 +9,7 @@ function Explosion:createNewExplosion(x, y, angle)
     x=x,
     y=y,
     frame=1,
-    sound=Sounds.explodeBubble[love.math.random(#Sounds.explodeBubble)]:clone(),
+    source=Sounds.explodeBubble[love.math.random(#Sounds.explodeBubble)].source:clone(),
     rotate= angle,
     rotateSens=math.cos(angle),
     speedRot=love.math.random(60,360),
@@ -62,11 +62,11 @@ function Explosion:update(dt)
     if explo:update(dt) then
       explo.frame = explo.frame + 1
       if explo.frame == 2 then
-        explo.sound:play()
+        explo.source:play()
       end
       if explo.frame > #Explosion.images then
         explo.isDestroy = true
-        if not explo.sound:isPlaying() then
+        if not explo.source:isPlaying() then
           table.remove(self.list, n)
         end
       end

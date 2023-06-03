@@ -49,8 +49,8 @@ end
 function Menu:open()
   Game.isStop = true
   --
-  if not Sounds.musique:isPlaying() then
-    Sounds.musique:play()
+  if not Sounds.musique.source:isPlaying() then
+    Sounds.musique.source:play()
   end
 end
 --
@@ -61,18 +61,18 @@ function Menu:load()
   --
   Menu:open()
   --
-  Sounds.musique:setVolume(0)
+  Sounds.musique.source:setVolume(0)
 end
 --
 
 function Menu:update(dt)
-  if Sounds.musique:getVolume() < Sounds.Music.volume then
-    Sounds.musique:setVolume(Sounds.musique:getVolume()+(dt/10))
-  elseif Sounds.musique:getVolume() >= Sounds.Music.volume then
-    Sounds.musique:setVolume(Sounds.musique:getVolume()-(dt/10))
+  if Sounds.musique.source:getVolume() < Sounds.Music.volume then
+    Sounds.musique.source:setVolume(Sounds.musique.source:getVolume()+(dt/10))
+  elseif Sounds.musique.source:getVolume() >= Sounds.Music.volume then
+    Sounds.musique.source:setVolume(Sounds.musique.source:getVolume()-(dt/10))
   end
-  if math.floor(Sounds.musique:getVolume()*100) == Sounds.Music.volume * 100 then
-    Sounds.musique:setVolume(Sounds.Music.volume)
+  if math.floor(Sounds.musique.source:getVolume()*100) == Sounds.Music.volume * 100 then
+    Sounds.musique.source:setVolume(Sounds.Music.volume)
   end
   --
   Game:getDimensions()

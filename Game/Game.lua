@@ -1,4 +1,4 @@
-local Game = {debug=false, isStop=false, isPlay=false, gameover=false, bestscore=false}
+local Game = {debug=false, isStop=false, isPlay=false, gameover=false, bestscore=false, StartNewGame=true}
 
 Game.texts = {}
 
@@ -15,10 +15,13 @@ function Game:newGame()
   --
   Game.gameover=false
   --
+  Game.StartNewGame=true
+  --
   MapManager:newGame()
   Bubbles:newGame()
   Sounds:newGame()
   Explosion:newGame()
+  WallsMap:newGame()
   --
   Gui:load()
 end
@@ -38,7 +41,22 @@ end
 --
 
 function Game:incrementeScore(score)
-  Gui.ScoreGame.score = Gui.ScoreGame.score + score
+  if not Game.gameover then
+    Gui.ScoreGame.score = Gui.ScoreGame.score + score
+  end
+end
+--
+
+function Game:checkUpdateNewLevel()
+  --  -- if no bubbles in grid ? New Level !!!
+  if  Game.isPlay and not Game.gameover then
+    if  #Bubbles.listGrid <= 1 then
+      MapManager.current.nbGridOnScreen = MapManager.current.nbGridOnScreen + 1
+      Bubbles:createNewLigneBubbles(math.min(MapManager.current.nbGridOnScreen, MapManager.current.lig-1), WorldGrid)
+      Game:incrementeScore(MapManager.current.nbGridOnScreen * 1000)
+      Sounds.levelup.source:play()
+    end
+  end
 end
 --
 
@@ -60,11 +78,11 @@ function Game:update(dt)
   BackGround:update(dt)
   Controllers:update(dt)
   Sounds:update(dt)
-  if Game.isStop then
-  else
+  if not Game.isStop then
     Explosion:update(dt)
     MapManager:update(dt)
     Bubbles:update(dt)
+    Game:checkUpdateNewLevel()
   end
 end
 --
@@ -73,14 +91,15 @@ function Game:draw()
   --
   BackGround:draw()
   --
+  Gui:draw()
+  Sounds:draw()
+  --
   Controllers:draw()
+  --
   WallsMap:draw()
   MapManager:draw()
   Bubbles:draw()
   Explosion:draw()
-  --
-  Gui:draw()
-  Sounds:draw()
   --
   if Game.isStop then
     love.graphics.setColor(Game.texts.isStop.color)
@@ -105,6 +124,7 @@ function Game:draw()
     end
     love.graphics.print(textDebugGame,10,10)
   end
+
 end
 --
 
@@ -118,10 +138,13 @@ function Game:keypressed(key)
   MapManager:keypressed(key)
   Bubbles:keypressed(key)
   Sounds:keypressed(key)
+  Controllers:keypressed(key)
 end
 --
 
 function Game:mousepressed(x,y,button)
+  Bubbles:mousepressed(x,y,button)
+  --
   Controllers:mousepressed(x,y,button)
 end
 --
