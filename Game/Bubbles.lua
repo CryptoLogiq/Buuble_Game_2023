@@ -174,7 +174,7 @@ end
 
 function Bubbles:newBubblePlayer()
 
-  if Game.isPlay and not Game.gameover then
+  if not Game.gameover then
 
     local createnewbubble = true
     for _, bubble in ipairs(Bubbles.listGrid) do
@@ -186,6 +186,8 @@ function Bubbles:newBubblePlayer()
       Bubbles.game = Bubbles:newBubble(Game.ox, Game.h, true, WorldGrid) -- x, y, isPlayer, World, grid
       --
       Bubbles.readyLaunch = true
+      --
+      Game.isPlay = true
 
     end
     --
@@ -210,7 +212,7 @@ end
 --
 
 function Bubbles:addLigne(nbLig)
-  if Game.isPlay   and not Game.gameover then
+  if Game.isPlay and not Game.gameover then
     --
     local map = MapManager.current
     --
@@ -239,7 +241,7 @@ function Bubbles:addLigne(nbLig)
 
     -- if one of all bubble's as no refGrid THEN it's gameover : go destroy all !
     if gameover then
-      Bubbles:gameOver()
+      Bubbles:cleanForGameOver()
       Bubbles:createNewLigneBubbles(nbLig, WorldDestroy)
     else
       Bubbles:createNewLigneBubbles(nbLig, WorldGrid)
@@ -304,13 +306,15 @@ function Bubbles:launchBubble()
 end
 --
 
-function Bubbles:gameOver()
+function Bubbles:cleanForGameOver()
   for _, bub in ipairs(Bubbles.listGrid) do
     bub:changeWorld(WorldDestroy)
   end
   Bubbles:resetList(Bubbles.listGrid)
   --
   Bubbles.game = nil
+  --
+  Game.gameover = true
 end
 --
 
@@ -323,6 +327,7 @@ function Bubbles:updateBubblePlayer(dt)
     bblaunch.body:setMass(bblaunch.mass) -- set mass to 0 for no friction with multiples rebounds.
     --
     if bblaunch.isLaunch then
+      Game.isPlay = false
 
       local isTouching = false
 
@@ -385,7 +390,7 @@ function Bubbles:updateBubblePlayer(dt)
         else
           -- not grid ! game over
           Game.gameover = true
-          Bubbles.gameOver()
+          Bubbles.cleanForGameOver()
           return false
           --
         end
@@ -484,8 +489,8 @@ function Bubbles:MoveGrid(dt)
       end
     elseif not Game.StartNewGame then
       if dist <= 10 then
-        if not Sounds.go.source:isPlaying() and #Sounds.list <= 0 then
-          Sounds:addPlayList(Sounds.go)
+        if #Sounds.playlist <= 0 then
+          Sounds:addPlayListNoDoublon(Sounds.go)
         end
       end
     end
@@ -584,6 +589,8 @@ function Bubbles:newGame()
   Bubbles:createNewLigneBubbles(MapManager.current.nbGridOnScreen, WorldGrid)
   --
   Bubbles:newBubblePlayer()
+  --
+  Game.isPlay = false
 end
 --
 
@@ -651,7 +658,7 @@ function Bubbles:update(dt)
 
   -- #######START######### --
   -- ### Destroy bubbles world ### --
-  -- Purge Destroy list
+  -- Purge list Grid :
   for n=#Bubbles.listGrid, 1, -1 do
     local bubble = Bubbles.listGrid[n]
     if self.isDead then
@@ -659,6 +666,8 @@ function Bubbles:update(dt)
       table.remove(Bubbles.listGrid, n)
     end
   end
+  -- ### Destroy bubbles world ### --
+  -- Purge Destroy list
   -- update bubble get isDead ?
   for _, bubble in ipairs(Bubbles.listDestroy) do
     bubble:update(dt)

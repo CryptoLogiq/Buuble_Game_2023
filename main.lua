@@ -24,10 +24,12 @@ Gui = require("Game/Gui")
 -- Many Scenes used (Intro/Menu/Game/etc.) :
 Game = require("Game/Game")
 Menu = require("Game/Menu")
+GameOver = require("Game/GameOver")
 
 -- add scenes to SceneManager
 Core.Scene.newScene(Game, "Game")
 Core.Scene.newScene(Menu, "Menu")
+Core.Scene.newScene(GameOver, "GameOver")
 
 function love.load()
   -- preload first

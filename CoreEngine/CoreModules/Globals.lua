@@ -1,3 +1,38 @@
+function TimerReset(self, dt)
+  self.current = 0
+end
+--
+
+function updateTimerNoLoop(self, dt)
+  self.current = self.current + self.speed * dt
+  if self.current >= self.delai then
+    return true
+  end
+  return false
+end
+--
+
+function updateTimerLoop(self, dt)
+  self.current = self.current + self.speed * dt
+  if self.current >= self.delai then
+    self.current = 0
+    return true
+  end
+  return false
+end
+--
+
+function updateTimerRandomSpeed(self, dt)
+  self.current = self.current + self.speed * dt
+  if self.current >= self.delai then
+    self.current = 0
+    self.speed = love.math.random(self.speedMin, self.speedMax)
+    return true
+  end
+  return false
+end
+--
+
 Mouse = love.mouse
 Mouse.w, Mouse.h = 1, 1
 

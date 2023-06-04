@@ -1,18 +1,108 @@
-local MapManager = {debug=false, current=nil}
+local MapManager = {debug=false, current=nil, lig=12, col=19}
 
 local listMapManagers = {}
 
-function MapManager:newGame()
-  MapManager.current = MapManager:new(13, 18)
-  MapManager.current.nbGridOnScreen = 3
+local listlines = {marge = 0, speedMin=60, speedMax=120, timer={update=updateTimerNoLoop, reset=TimerReset, current=0, delai=60, speed=120}, isCollide=false}
+
+
+local colorsEletric = {}
+table.insert(colorsEletric, {0,0.808,0.82,1})
+table.insert(colorsEletric, {0,0.749,1,1})
+table.insert(colorsEletric, {1,1,0,1})
+table.insert(colorsEletric, {1,0.843,0,1})
+table.insert(colorsEletric, {0,1,1,1})
+table.insert(colorsEletric, {0.118,0.565,1,1})
+table.insert(colorsEletric, {0.961,0.961,0.961,1})
+table.insert(colorsEletric, {0.118,0.565,1,1})
+table.insert(colorsEletric, {0,1,1,1})
+table.insert(colorsEletric, {1,0.647,0,1})
+--
+function listlines:newTimerRandom()
+  return {
+    update=updateTimerRandomSpeed,
+    current=0,
+    delai=10,
+    speed=love.math.random(listlines.speedMin, listlines.speedMax),
+    speedMin=listlines.speedMin,
+    speedMax=listlines.speedMax
+  }
+end
+--
+--
+function listlines:load()
+  for n=1, 10 do
+    listlines[n]= {
+      color=colorsEletric[love.math.random(#colorsEletric)],
+      timer=listlines:newTimerRandom(),
+      line={}
+    }
+    listlines:newLinePoints(n)
+  end
+  --
+  self.marge = (Game.h - MapManager.current.h) / 3
+  --
+end
+--
+function listlines:newLinePoints(n)
+  local m = MapManager.current
+  --
+  local start = {x = m.x, y = m.h}
+  local finish = {x = m.x + m.w, y = m.h}
+  local dist = (finish.x - start.x) / 10
+  --
+  listlines[n].line = {}
+  listlines[n].color = colorsEletric[love.math.random(#colorsEletric)]
+  --
+  table.insert(listlines[n].line,  start.x )
+  table.insert(listlines[n].line, start.y + love.math.random(-1, self.marge))
+  for p=1, 8 do
+    table.insert(listlines[n].line, start.x + (dist*p) + love.math.random(-self.marge, self.marge)) 
+    table.insert(listlines[n].line, start.y+love.math.random(-1, self.marge))
+  end
+  table.insert(listlines[n].line, finish.x)
+  table.insert(listlines[n].line, finish.y + love.math.random(-1, self.marge))
+  --
+end
+--
+function listlines:update(dt)
+  for n=1, 10 do
+    if listlines[n].timer:update(dt) then
+      listlines:newLinePoints(n)
+    end
+  end
+  if self.timer:update(dt) then
+    self.isCollide = false
+  end
 end
 --
 
-function MapManager:new(lig, col)
+
+function MapManager:newGame()
+  MapManager.current = MapManager:new()
+  MapManager.current.nbGridOnScreen = 3
+  --
+  listlines:load()
+  --
+end
+--
+
+function MapManager:new()
+  local nbBubbles = 280 -- au plus proche possible de ce resultat
+  local margeSafe = 64 + 32 -- 1 rangee de bubbles + la moitier d'un bubble (celui du player)
   local cellW = 64
   local cellH = 64
   local cellOX = 32
   local cellOY = 32
+  --
+--  local lig = math.floor( (Game.h- margeSafe) / cellH )
+--  local col = math.floor(nbBubbles/lig)
+  local lig = MapManager.lig
+  local col = MapManager.col
+  --
+  if MapManager.debug then
+    print("lig :",lig,", col :",  col, " soit :", lig*col, "bubbles.")
+  end
+  --
   local w = (cellW * col) + cellOX
   local h = cellH * lig
   local ox = w/2
@@ -141,16 +231,43 @@ end
 function MapManager:load()
   MapManager.current = MapManager:new(12, 18)
   MapManager.current.nbGridOnScreen = 3
+  --
+  listlines:load()
+  --
 end
 --
 
 function MapManager:update(dt)
+  listlines:update(dt)
 end
 --
 
 function MapManager:draw()
+  -- fire line limit
+  if Bubbles.game then
+    local bub = Bubbles.game
+    local m = self.current
+    --
+    local isCollide = CheckCollision(bub.x-bub.radius, bub.y-bub.radius, bub.radius*2, bub.radius*2, m.x, m.y+m.h, m.w, listlines.marge)
+    --
+    if isCollide then
+      listlines.timer:reset()
+      listlines.isCollide = true
+      Sounds:addPlayListNoDoublon(Sounds.impact)
+    else
+      if not listlines.isCollide then
+        for n=1, #listlines do
+          love.graphics.setColor(listlines[n].color)
+          love.graphics.line(listlines[n].line)
+        end
+      end
+    end
+  end
+  love.graphics.setColor(1,1,1,1)
+  --
+
   -- debug
-  if Game.debug then
+  if MapManager.debug then
     -- grilles
     for l=1, MapManager.current.lig do
       for c=1, MapManager.current.col do

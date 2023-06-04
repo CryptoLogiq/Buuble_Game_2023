@@ -60,6 +60,16 @@ function Game:checkUpdateNewLevel()
 end
 --
 
+function Game:checkGAmeOver()
+  -- ### it's a Game Over ?' ### --
+  if Game.gameover then
+    if #Bubbles.listGrid <=0 and #Bubbles.listDestroy <= 0 then
+      Core.Scene.setScene(GameOver)
+    end
+  end
+end
+--
+
 --
 function Game:load()
   Game:getDimensions()
@@ -83,6 +93,7 @@ function Game:update(dt)
     MapManager:update(dt)
     Bubbles:update(dt)
     Game:checkUpdateNewLevel()
+    Game:checkGAmeOver()
   end
 end
 --

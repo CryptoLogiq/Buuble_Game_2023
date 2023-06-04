@@ -1,4 +1,4 @@
-local Sounds = {debug=false, list={}, listMusic={}, listSfx={}, current=nil}
+local Sounds = {debug=false, playlist={}, listClone={}, listMusic={}, listSfx={}, current=nil}
 
 local dirpathMusic = "ressources/musiques/"
 local dirpathSfx = "ressources/sounds/"
@@ -8,49 +8,63 @@ Sounds.Sfx = {volume=0.4,type="Music"}
 
 
 function Sounds:newGame()
-  Sounds:purgeList()
+  self:purgePlayList()
 end
 --
 
-function Sounds:purgeList()
-  for n=#Sounds.list, 1, -1 do
-    local sound = Sounds.list[n]
+function Sounds:purgePlayList()
+  for n=#self.listClone, 1, -1 do
+    local sound = self.listClone[n]
     sound:stop()
   end
-  Sounds.list={}
+  self.playlist={}
+  self.listClone={}
 end
 --
 
 function Sounds:newCounter()
   for n=3, 1, -1 do
-    table.insert(Sounds.list, Sounds.counter[n].source:clone())
+    self:addPlayList(self.counter[n])
   end
-  table.insert(Sounds.list, Sounds.go.source:clone())
+  self:addPlayList(self.go)
 end
 --
 
 function Sounds:addPlayList(sound)
-  table.insert(Sounds.list, sound.source:clone())
+  table.insert(self.playlist, sound)
+  table.insert(self.listClone, sound.source:clone())
+end
+--
+
+function Sounds:addPlayListNoDoublon(sound)
+  for _, search in ipairs(self.playlist)do
+    if sound == search then
+      return
+    end
+  end
+  self:addPlayList(sound)
 end
 --
 
 function Sounds:listUpdate(dt)
-  if #Sounds.list > 0 then
-    if not Sounds.currentSource then
-      Sounds.currentSource = Sounds.list[1]
-      Sounds.currentSource:play()
+  if #self.playlist > 0 then
+    if not self.currentSource then
+      self.currentSource = self.listClone[1]
+      self.currentSource:play()
     end
   end
   --
-  if Sounds.currentSource then
-    if Sounds.currentSource:isPlaying() == false then
---      Sounds.currentSource:release()
-      table.remove(Sounds.list, 1)
-      if #Sounds.list > 1 then
-        Sounds.currentSource = Sounds.list[1]
-        Sounds.currentSource:play()
+  if self.currentSource then
+    if self.currentSource:isPlaying() == false then
+      table.remove(self.playlist, 1)
+      table.remove(self.listClone, 1)
+      if #self.playlist > 1 then
+        self.currentSource = self.listClone[1]
+        self.currentSource:play()
       else
-        Sounds.currentSource = nil
+        self.currentSource = nil
+        self.playlist={}
+        self.listClone={}
       end
     end
   end
@@ -59,35 +73,35 @@ end
 
 function Sounds:musiqueUpdate(dt)
   if Game.isStop then
-    Sounds.musique.source:setVolume(0)
-    if Sounds.musique.source:isPlaying() then
-      Sounds.musique.source:pause()
+    self.musique.source:setVolume(0)
+    if self.musique.source:isPlaying() then
+      self.musique.source:pause()
     end
   else
-    if not Sounds.musique.source:isPlaying() then
-      Sounds.musique.source:play()
+    if not self.musique.source:isPlaying() then
+      self.musique.source:play()
     end
-    if Sounds.musique.source:getVolume() < Sounds.Music.volume then
-      Sounds.musique.source:setVolume(Sounds.musique.source:getVolume()+(dt/10))
-    elseif Sounds.musique.source:getVolume() > Sounds.Music.volume then
-      Sounds.musique.source:setVolume(Sounds.musique.source:getVolume()-(dt/10))
+    if self.musique.source:getVolume() < self.Music.volume then
+      self.musique.source:setVolume(self.musique.source:getVolume()+(dt/10))
+    elseif self.musique.source:getVolume() > self.Music.volume then
+      self.musique.source:setVolume(self.musique.source:getVolume()-(dt/10))
     end
-    if math.floor(Sounds.musique.source:getVolume()*100) == Sounds.Music.volume then
-      Sounds.musique.source:setVolume(Sounds.Music.volume)
+    if math.floor(self.musique.source:getVolume()*100) == self.Music.volume then
+      self.musique.source:setVolume(self.Music.volume)
     end
   end
 end
 --
 
 function Sounds:setVolume(pRef)
-  if pRef == Sounds.Music then -- musique
+  if pRef == self.Music then -- musique
     for _, sound in ipairs(self.listMusic) do
-      local volume = math.max(Sounds.Music.volume + sound.diffVolume, 0.05)
+      local volume = math.max(self.Music.volume + sound.diffVolume, 0.05)
       sound.source:setVolume(volume)
     end
-  elseif pRef == Sounds.Sfx then    -- Sfx
+  elseif pRef == self.Sfx then    -- Sfx
     for _, sound in ipairs(self.listSfx) do
-      local volume = math.max(Sounds.Music.volume + sound.diffVolume, 0.05)
+      local volume = math.max(self.Music.volume + sound.diffVolume, 0.05)
       sound.source:setVolume(volume)
     end
   end
@@ -97,7 +111,7 @@ end
 function Sounds:newMusic(pFile, pDiffVolume)
   local new = {source=love.audio.newSource(dirpathMusic..pFile, "stream"), diffVolume = pDiffVolume or 0}
   new.source:setLooping(true)
-  local volume = math.max(Sounds.Music.volume + new.diffVolume, 0.05)
+  local volume = math.max(self.Music.volume + new.diffVolume, 0.05)
   new.source:setVolume(volume)
   table.insert(self.listMusic, new)
   return new
@@ -106,7 +120,7 @@ end
 
 function Sounds:newSfx(pFile, pDiffVolume)
   local new = {source=love.audio.newSource(dirpathSfx..pFile, "static"), diffVolume = pDiffVolume or 0}
-  local volume = math.max(Sounds.Music.volume + new.diffVolume, 0.05)
+  local volume = math.max(self.Music.volume + new.diffVolume, 0.05)
   new.source:setVolume(volume)
   table.insert(self.listSfx, new)
   return new
@@ -143,9 +157,9 @@ end
 --
 
 function Sounds:update(dt)
-  Sounds:musiqueUpdate(dt)
+  self:musiqueUpdate(dt)
   --
-  Sounds:listUpdate(dt)
+  self:listUpdate(dt)
 end
 --
 
