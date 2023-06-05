@@ -11,6 +11,9 @@ WorldDestroy = love.physics.newWorld(0,10*64,false)
 -- requires Core modules
 Core = require("CoreEngine/CoreLoader")
 
+-- Gestion du tableau des scores
+ScoreBoard = require("Game/ScoreBoard")
+
 -- requires for Game
 BackGround = require("Game/BackGround")
 MapManager = require("Game/MapManager")
