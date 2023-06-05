@@ -60,7 +60,18 @@ end
 --
 
 function Menu:load()
-  ButtonPlay = Menu:newButton( "Jouer" , function() if Game.StartNewGame then Game:newGame() end ; Core.Scene.setScene(Game) end )
+  ButtonPlay = Menu:newButton( 
+    "Jouer",
+    function()
+      if Game.StartNewGame or Game.gameover then
+        Game:newGame() 
+      end
+      if Game.isStop then
+        Game.isStop = false
+      end
+      Core.Scene.setScene(Game)
+    end 
+  )
   ButtonPlay.colorDef = {0.42,0.557,0.137,1}
   ButtonPlay.colorSurvol = {0,1,0.498,1}
   ButtonQuit = Menu:newButton( "Quitter" , function() love.event.quit() end )

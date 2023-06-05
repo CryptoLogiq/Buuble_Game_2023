@@ -38,6 +38,8 @@ Mouse.w, Mouse.h = 1, 1
 
 function Mouse:update()
   self.x, self.y = self:getPosition()
+  self.x = self.x / (Screen.sx or 1 )
+  self.y = self.y / (Screen.sy or 1 )
 end
 --
 

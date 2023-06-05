@@ -24,9 +24,9 @@ end
 
 function Sounds:newCounter()
   for n=3, 1, -1 do
-    self:addPlayList(self.counter[n])
+    self:addPlayListNoDoublon(self.counter[n])
   end
-  self:addPlayList(self.go)
+  self:addPlayListNoDoublon(self.go)
 end
 --
 

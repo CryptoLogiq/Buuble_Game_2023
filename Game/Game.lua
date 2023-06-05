@@ -5,8 +5,10 @@ Game.texts = {}
 Game.colorFade = {1,1,1,0.8}
 
 function Game:getDimensions()
-  self.w, self.h = love.graphics.getDimensions()
-  self.ox, self.oy = self.w/2, self.h/2
+  self.w = 1920
+  self.h = 1080
+  self.ox = self.w/2
+  self.oy = self.h/2
 end
 --
 
@@ -84,7 +86,6 @@ end
 function Game:update(dt)
   Gui:update(dt)
   --
-  Game:getDimensions(dt)
   BackGround:update(dt)
   Controllers:update(dt)
   Sounds:update(dt)
@@ -144,6 +145,7 @@ function Game:keypressed(key)
     Game.isStop = not Game.isStop
   elseif key == "escape" then
     -- Menu
+    if not Game.isStop then Game.isStop = true end
     Core.Scene.setScene(Menu)
   end
   BackGround:keypressed(key)

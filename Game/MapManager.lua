@@ -1,4 +1,4 @@
-local MapManager = {debug=false, current=nil, lig=12, col=19}
+local MapManager = {debug=false, current=nil, lig=15, col=20}
 
 local listMapManagers = {}
 

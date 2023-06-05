@@ -371,18 +371,18 @@ function Bubbles:updateBubblePlayer(dt)
             local destroyBool, nbBubbles = Bubbles:impactGroup(bblaunch.x, bblaunch.y)
             if destroyBool then
               if nbBubbles >= 5 then
-                Sounds:addPlayList(Sounds.impactGroup)
-                Sounds:addPlayList(Sounds.correct)
+                Sounds:addPlayListNoDoublon(Sounds.impactGroup)
+                Sounds:addPlayListNoDoublon(Sounds.correct)
                 local score = math.floor(nbBubbles * 1.7)
                 Game:incrementeScore(score)
               else
-                Sounds:addPlayList(Sounds.impactGroup)
+                Sounds:addPlayListNoDoublon(Sounds.impactGroup)
               end
             else
-              Sounds:addPlayList(Sounds.impact)
+              Sounds:addPlayListNoDoublon(Sounds.impact)
             end
           else
-            Sounds:addPlayList(Sounds.impact)
+            Sounds:addPlayListNoDoublon(Sounds.impact)
           end
           --
           Bubbles:newBubblePlayer()
@@ -405,7 +405,7 @@ function Bubbles:updateBubblePlayer(dt)
           Bubbles:newBubblePlayer()
           return true
         else
-          Sounds:addPlayList(Sounds.rebond)
+          Sounds:addPlayListNoDoublon(Sounds.rebond)
         end
       end
     end
@@ -621,15 +621,7 @@ function Bubbles:update(dt)
     end
 
     if nbBubblesFall >= 3 then
-      local add = true
-      for _, sound in ipairs(Sounds.list) do
-        if sound == Sounds.correct then
-          add = false
-        end
-      end
-      if add then
-        Sounds:addPlayList(Sounds.correct)
-      end
+        Sounds:addPlayListNoDoublon(Sounds.correct)
     end
 
   end
@@ -725,7 +717,7 @@ function Bubbles:mousepressed(x, y, button)
     if Bubbles.game then
       if not Bubbles.game.isLaunch then
         local map = MapManager.current
-        if CheckCollision(map.x, map.y, map.w, Game.h,   x,y,1,1) then
+        if Mouse.inMap then
           Bubbles:launchBubble()
         end
       end

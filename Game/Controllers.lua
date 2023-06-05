@@ -61,7 +61,8 @@ function ligneRail:update(dt)
   end
   if not Game.isStop and curseurGrid.isLimit then
     if not Mouse.inMap then
-      Mouse.setPosition(curseurGrid.x, curseurGrid.y)
+      Mouse.setPosition(curseurGrid.x*Screen.sx, curseurGrid.y*Screen.sy)
+      Mouse.inMap = true
     end
   end
   --
@@ -142,9 +143,9 @@ end
 function Controllers:update(dt)
   Mouse:update()
 
-  Controllers:updateCurseurs(dt)
-
   Controllers:MouseInMap()
+
+  Controllers:updateCurseurs(dt)
 
   -- rail
   demicercleRail:update(dt)
@@ -173,6 +174,9 @@ end
 --
 
 function Controllers:keypressed(key)
+  if key == "f12" then
+    love.window.setFullscreen(not love.window.getFullscreen())
+  end
 end
 --
 

@@ -20,6 +20,7 @@ Controllers  = require("Game/Controllers")
 Sounds  = require("Game/Sounds")
 Explosion  = require("Game/Explosion")
 Gui = require("Game/Gui")
+Screen = require("Game/Screen")
 
 -- Many Scenes used (Intro/Menu/Game/etc.) :
 Game = require("Game/Game")
@@ -50,9 +51,12 @@ function love.load()
   Controllers:load()
   -- last :
   Game:newGame()
-  
+
   -- other scenes
   Menu:load()
+
+  -- end
+  Screen:load()
 end
 --
 
@@ -61,11 +65,12 @@ function love.update(dt)
   WorldDestroy:update(dt)
   --
   Core.Scene.update(dt)
+  Screen:update(dt)
 end
 --
 
 function love.draw()
-  Core.Scene.draw()
+  Screen:draw(Core.Scene.draw)
 end
 --
 
