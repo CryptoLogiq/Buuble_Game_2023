@@ -1,4 +1,4 @@
-local Bubbles = {debug=false}
+local Bubbles = {debug=false, isMove=true}
 
 Bubbles.__index = Bubbles
 
@@ -15,7 +15,7 @@ Bubbles.readyLaunch = false
 local colorsBubbles = {{1,0,1,1},{0,1,0,1},{0,0,1,1},{0,0,0,1},{1,0,0,1}}
 
 function Bubbles:newBubble(x, y, isPlayer, World, grid)
-  local bub = {world=World, angle=math.rad(love.math.random(360)), debug=false, isPlayer=isPlayer, isDead=false, listWall={}, isWall=true, grid=grid or nil, x=x, y=y, rebounds=0, radius=32, restitution=0.9, ox=32, oy=32, speed=60, force=1200, colorID=love.math.random(5), isLaunch=false}
+  local bub = {world=World, angle=math.rad(love.math.random(360)), debug=false, isPlayer=isPlayer, isDead=false, listWall={}, isWall=true, grid=grid or nil, x=x, y=y, rebounds=0, radius=32, restitution=0.9, ox=32, oy=32, speed=60, force=1200, colorID=love.math.random(5), isLaunch=false, isBouncing=false}
 
   -- if low bubbles in grid, make colors for player to match with last bubbles in grid :
   if isPlayer and #Bubbles.listGrid >= 1 then
@@ -127,7 +127,7 @@ function Bubbles.getFunctions(self)
     self.body:destroy()
     --
     if toWorld == WorldDestroy then
-      Game:incrementeScore(10)
+      Game:incrementeScore(10, self.x, self.y+32, false)
       Bubbles:purgeMeOnList(self, Bubbles.listGrid)
     elseif toWorld == WorldGrid then
       Bubbles:purgeMeOnList(self, Bubbles.listDestroy)
@@ -297,7 +297,8 @@ function Bubbles:launchBubble()
     Bubbles.game.fixture:destroy()
     Bubbles.game.shape = love.physics.newCircleShape(Bubbles.game.radius * 0.8)
     Bubbles.game.fixture = love.physics.newFixture(Bubbles.game.body, Bubbles.game.shape)
-    Bubbles.game.fixture:setRestitution(Bubbles.game.restitution)
+--    Bubbles.game.fixture:setRestitution(Bubbles.game.restitution)
+    Bubbles.game.fixture:setRestitution(1)
     --
     Game.isPlay = false
     --
@@ -370,11 +371,11 @@ function Bubbles:updateBubblePlayer(dt)
           if bblaunch.group then
             local destroyBool, nbBubbles = Bubbles:impactGroup(bblaunch.x, bblaunch.y)
             if destroyBool then
-              if nbBubbles >= 5 then
+              if nbBubbles >= 4 then
                 Sounds:addPlayListNoDoublon(Sounds.impactGroup)
                 Sounds:addPlayListNoDoublon(Sounds.correct)
-                local score = math.floor(nbBubbles * 1.7)
-                Game:incrementeScore(score)
+                local score = math.floor(nbBubbles * 2.3) * 10
+                Game:incrementeScore(score, bblaunch.x, bblaunch.y+64, true)
               else
                 Sounds:addPlayListNoDoublon(Sounds.impactGroup)
               end
@@ -480,6 +481,7 @@ function Bubbles:MoveGrid(dt)
     end
     -- all bub's in at position to grid ?
     Game.isPlay = goplay
+    Bubbles.isMove = not goplay
 
     -- Declenche le compte a rebours ?
     if Game.StartNewGame then
@@ -621,7 +623,8 @@ function Bubbles:update(dt)
     end
 
     if nbBubblesFall >= 3 then
-        Sounds:addPlayListNoDoublon(Sounds.correct)
+      Sounds:addPlayListNoDoublon(Sounds.correct)
+      Game:incrementeScore(math.floor(nbBubblesFall*2.3*10), Game.ox, Game.oy, false)
     end
 
   end

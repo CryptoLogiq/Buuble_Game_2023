@@ -1,3 +1,4 @@
+
 function TimerReset(self, dt)
   self.current = 0
 end
@@ -33,6 +34,15 @@ function updateTimerRandomSpeed(self, dt)
 end
 --
 
+function newTimer(speed, loop)
+  if loop then
+    return {update=updateTimerLoop, reset=TimerReset, current=0, delai=30, speed=speed or 60}
+  else
+    return {update=updateTimerNoLoop, reset=TimerReset, current=0, delai=30, speed=speed or 60}
+  end
+end
+--
+
 Mouse = love.mouse
 Mouse.w, Mouse.h = 1, 1
 
@@ -64,20 +74,6 @@ end
 
 function math.sign(number)
   if number >= 0 then return 1 else return -1 end
-end
---
-
-
-local function updateTextDraw(self)
-  self.w, self.h = self.text:getDimensions()
-  self.ox, self.oy = self.w/2, self.h/2
-end
---
-
-function newNameDraw(self, pFont)
-  if not pFont then pFont = love.graphics.getFont(8) end
-  self.nameDraw = {text=love.graphics.newText(pFont, self.name), updateTextDraw=updateTextDraw}
-  self.nameDraw:updateTextDraw(self)
 end
 --
 

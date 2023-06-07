@@ -14,6 +14,7 @@ end
 
 function Game:newGame()
   Game.isStop = false
+  Game.isPlay = false
   --
   Game.gameover=false
   --
@@ -24,6 +25,7 @@ function Game:newGame()
   Sounds:newGame()
   Explosion:newGame()
   WallsMap:newGame()
+  ScoreEffect:newGame()
   --
   Gui:load()
 end
@@ -42,9 +44,12 @@ function Game:updateBestScore(bestscore)
 end
 --
 
-function Game:incrementeScore(score)
+function Game:incrementeScore(score, px, py, pbonus)
   if not Game.gameover then
     Gui.ScoreGame.score = Gui.ScoreGame.score + score
+    if px and py then
+      ScoreEffect:new(score, px, py, pbonus)
+    end
   end
 end
 --
@@ -55,7 +60,7 @@ function Game:checkUpdateNewLevel()
     if  #Bubbles.listGrid <= 1 then
       MapManager.current.nbGridOnScreen = MapManager.current.nbGridOnScreen + 1
       Bubbles:createNewLigneBubbles(math.min(MapManager.current.nbGridOnScreen, MapManager.current.lig-1), WorldGrid)
-      Game:incrementeScore(MapManager.current.nbGridOnScreen * 1000)
+      Game:incrementeScore(MapManager.current.nbGridOnScreen * 1000, Game.ox, Game.oy, true)
       Sounds.levelup.source:play()
     end
   end
@@ -90,11 +95,13 @@ function Game:update(dt)
   Controllers:update(dt)
   Sounds:update(dt)
   if not Game.isStop then
+    WallsMap:update(dt)
     Explosion:update(dt)
     MapManager:update(dt)
     Bubbles:update(dt)
     Game:checkUpdateNewLevel()
     Game:checkGAmeOver()
+    ScoreEffect:update(dt)
   end
 end
 --
@@ -112,6 +119,7 @@ function Game:draw()
   MapManager:draw()
   Bubbles:draw()
   Explosion:draw()
+  ScoreEffect:draw()
   --
   if Game.isStop then
     love.graphics.setColor(Game.texts.isStop.color)

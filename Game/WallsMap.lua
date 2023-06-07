@@ -34,7 +34,6 @@ function WallsMap:load()
 
 -- down Grid OFF for collision :
   WallsMap.downGrid.body:setActive(false)
-
 end
 --
 
@@ -46,6 +45,14 @@ function WallsMap:newGame()
   self.list={}
   --
   WallsMap:load()
+  --
+end
+--
+
+function WallsMap:update(dt)
+  if Game.isPlay ~= nil then
+    WallsMap.upGrid.body:setActive(not Bubbles.isMove)
+  end
 end
 --
 

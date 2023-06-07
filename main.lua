@@ -23,7 +23,10 @@ Controllers  = require("Game/Controllers")
 Sounds  = require("Game/Sounds")
 Explosion  = require("Game/Explosion")
 Gui = require("Game/Gui")
+ScoreEffect = require("Game/ScoreEffect")
+--
 Screen = require("Game/Screen")
+
 
 -- Many Scenes used (Intro/Menu/Game/etc.) :
 Game = require("Game/Game")
@@ -41,6 +44,7 @@ function love.load()
 
   -- need first load for dependencies
   Sounds:load()
+  ScoreEffect:load()
   Game:load() 
 
   --

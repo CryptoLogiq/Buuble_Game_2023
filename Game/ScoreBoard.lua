@@ -1,4 +1,5 @@
 local ScoreBoard = {}
+--[[
 -- Incluez la bibliothèque http pour faire des requêtes HTTP
 local http = require('socket.http')
 local https = require("ssl.https")
@@ -61,5 +62,5 @@ for i = 1, max_redirects do
   end
 end
 --
-
+--]]
 return ScoreBoard
